@@ -1,6 +1,7 @@
 package com.example.valsearch.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +14,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequestMapping("profile")
 @Slf4j
 public class ProfileController {
-    private final String RIOT_API_KEY = "RGAPI-0d1fb0b9-1489-430a-9d2e-d714c436c321";
+    @Value("${riot.api.key}")
+    private String RIOT_API_KEY;
 
     private final WebClient webClient;
 
