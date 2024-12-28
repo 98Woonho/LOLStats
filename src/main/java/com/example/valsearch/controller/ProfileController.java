@@ -26,6 +26,8 @@ public class ProfileController {
                 .build();
     }
 
+    // 플레이어 이름을 직접 검색했을 때 나오는 경로. API를 호출해서 총 데이터를 가져온 뒤 localStorage에 저장하는 방식으로 구현 예정
+    // url로 플레이어 이름과 카테고리를 입력해서 바로 들어오는 경우에는 localStorage에 해당 플레이어의 데이터가 있는지 없는지 확인 후, 없으면 API 호출, 있으면 데이터로 전적 표시
     @GetMapping("overview")
     public void getOverview(@RequestParam(value="playerName") String playerName) {
         log.info(playerName);
