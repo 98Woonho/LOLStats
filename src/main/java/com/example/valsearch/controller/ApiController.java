@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+// API를 호출하는 Controller
 @RestController
 @RequestMapping("/api")
 public class ApiController {
