@@ -14,7 +14,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 @RestController
 @RequestMapping("/api")
 public class ApiController {
-    private final String RIOT_API_KEY = "RGAPI-0d1fb0b9-1489-430a-9d2e-d714c436c321";
+
 
     private final WebClient webClient;
 
