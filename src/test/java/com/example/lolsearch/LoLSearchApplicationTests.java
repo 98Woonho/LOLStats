@@ -1,10 +1,10 @@
-package com.example.valsearch;
+package com.example.lolsearch;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ValSearchApplicationTests {
+class LoLSearchApplicationTests {
 
     @Test
     void contextLoads() {

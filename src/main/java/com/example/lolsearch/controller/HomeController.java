@@ -1,4 +1,4 @@
-package com.example.valsearch.controller;
+package com.example.lolsearch.controller;
 
 
 import lombok.extern.slf4j.Slf4j;

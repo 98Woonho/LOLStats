@@ -1,13 +1,13 @@
-package com.example.valsearch;
+package com.example.lolsearch;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ValSearchApplication {
+public class LoLSearchApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ValSearchApplication.class, args);
+        SpringApplication.run(LoLSearchApplication.class, args);
     }
 
 }
