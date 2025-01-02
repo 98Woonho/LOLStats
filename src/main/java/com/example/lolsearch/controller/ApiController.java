@@ -36,12 +36,31 @@ public class ApiController {
     // 플레이어 이름을 직접 검색했을 때 나오는 경로. API를 호출해서 총 데이터를 가져온 뒤 localStorage에 저장하는 방식으로 구현 예정
     // url로 플레이어 이름과 카테고리를 입력해서 바로 들어오는 경우에는 localStorage에 해당 플레이어의 데이터가 있는지 없는지 확인 후, 없으면 API 호출, 있으면 데이터로 전적 표시
 
-    @GetMapping("/getMatchlists")
-    public ResponseEntity<?> getMatchlists(@RequestParam(value="puuid") String puuid) {
-        log.info(puuid);
+    // 매치 정보를 가져오는 controller
+    @GetMapping("/match")
+    public ResponseEntity<?> getMatch(@RequestParam(value="matchId") String matchId) {
         try {
             String response = webClient.get()
-                    .uri(uriBuilder -> uriBuilder.path("/val/match/v1/matchlists/by-puuid/{puuid}")
+                    .uri(uriBuilder -> uriBuilder.path("/lol/match/v5/matches/{matchId}")
+                            .build(matchId))
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            return ResponseEntity.ok(response);
+        } catch (WebClientResponseException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+        }
+    }
+
+    // puuid로 매치리스트를 가져오는 controller
+    @GetMapping("/matchList")
+    public ResponseEntity<?> getMatchList(@RequestParam(value="puuid") String puuid) {
+        try {
+            String response = webClient.get()
+                    .uri(uriBuilder -> uriBuilder.path("/lol/match/v5/matches/by-puuid/{puuid}/ids?type=ranked")
                             .build(puuid))
                     .retrieve()
                     .bodyToMono(String.class)
@@ -56,7 +75,7 @@ public class ApiController {
     }
 
     // playerName으로 puuid를 가져오는 controller
-    @GetMapping("/getPUUID")
+    @GetMapping("/puuId")
     public ResponseEntity<?> getPUUID(@RequestParam(value="playerName") String playerName) {
         try {
             String[] playerNames = playerName.split("#");
