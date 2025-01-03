@@ -60,7 +60,9 @@ public class ApiController {
     public ResponseEntity<?> getMatchList(@RequestParam(value="puuid") String puuid) {
         try {
             String response = webClient.get()
-                    .uri(uriBuilder -> uriBuilder.path("/lol/match/v5/matches/by-puuid/{puuid}/ids?type=ranked")
+                    .uri(uriBuilder -> uriBuilder.path("/lol/match/v5/matches/by-puuid/{puuid}/ids")
+                            .queryParam("type", "ranked") // 쿼리 파라미터 추가
+                            .queryParam("queue", "420")
                             .build(puuid))
                     .retrieve()
                     .bodyToMono(String.class)

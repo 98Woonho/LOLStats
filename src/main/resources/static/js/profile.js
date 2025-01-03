@@ -1,3 +1,5 @@
+const runesJsonUrl = "/json/runes.json";
+
 document.addEventListener("DOMContentLoaded", async function() {
     const url = new URL(window.location.href);
     const playerName = encodeURIComponent(url.searchParams.get("playerName"));
@@ -14,28 +16,95 @@ document.addEventListener("DOMContentLoaded", async function() {
 
             try {
                 for (const matchId of matchList) {
-                    const response = await axios.get('/api/match?matchId=' + matchId);
-                    console.log(response.data.info.gameMode);
+
                 }
 
-                // const response = await axios.get('/api/match?matchId=' + matchList[0]);
-                // const info = response.data.info;
-                // console.log(info);
-                //
-                // // 게임 시작 시간
-                // const gameCreation = new Date(info.gameCreation);
-                // console.log("게임 시작 시간 : " + gameCreation.toLocaleString());
-                //
-                // // 게임 지속 시간
-                // const gameDuration = info.gameDuration;
-                // const hour = Math.floor(gameDuration / 3600);
-                // const minute = Math.floor((gameDuration % 3600) / 60);
-                // const second = gameDuration % 60;
-                // console.log("게임 지속 시간 : " + hour + "시간 " + minute + "분 " + second + "초");
-                //
-                // // 게임 종류
-                // const gameMode = info.gameMode;
+                const response = await axios.get('/api/match?matchId=' + matchList[0]);
+                const info = response.data.info;
+                console.log(info);
 
+                // 게임 시작 시간
+                const gameCreation = new Date(info.gameCreation);
+                console.log("게임 시작 시간 : " + gameCreation.toLocaleString());
+
+                // 게임 지속 시간
+                const gameDuration = info.gameDuration;
+                const hour = Math.floor(gameDuration / 3600);
+                const minute = Math.floor((gameDuration % 3600) / 60);
+                const second = gameDuration % 60;
+                console.log("게임 지속 시간 : " + hour + "시간 " + minute + "분 " + second + "초");
+
+
+                /** QueueId
+                 * 400, 430 : 일반 게임(소환사의 협곡)
+                 * 420 : 랭크 게임(솔로/듀오)
+                 * 440 : 랭크 게임(자유랭크)
+                 * 450 : 무작위 총력전(칼바람 나락)
+                 * 900, 1010 : URF 모드
+                 * 830 : AI 상대 게임(초급 봇)
+                 * 840 : AI 상대 게임(중급 봇)
+                 * 850 : AI 상대 게임(숙련 봇)
+                 */
+                const queueId = info.queueId;
+                console.log("큐 id : " + queueId);
+
+                // 게임 참가자 정보 배열
+                const participants = info.participants;
+                const participant = participants[0];
+
+                console.log("kills : " + participant.kills); // 킬 수
+                console.log("deaths : " + participant.deaths); // 데스 수
+                console.log("assists : " + participant.assists); // 어시스트 수
+
+                // Champion Square Assets : https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/<챔피언이름>.png
+                console.log("championName : " + participant.championName); // 챔피언 이름
+
+                // Item Square Assets : https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/<itemId>.png
+                // 아이템 정보
+                console.log("item0 : " + participant.item0);
+                console.log("item1 : " + participant.item1);
+                console.log("item2 : " + participant.item2);
+                console.log("item3 : " + participant.item3);
+                console.log("item4 : " + participant.item4);
+                console.log("item5 : " + participant.item5);
+                console.log("item6 : " + participant.item6);
+
+                console.log("summonerName : " + participant.summonerName); // 소환사 이름
+                console.log("riotIdTagline : " + participant.riotIdTagline); // 태그 이름
+                console.log("summonerLevel : " + participant.summonerLevel); // 소환사 레벨
+
+                // 소환사 스펠
+                console.log("summoner1Id : " + participant.summoner1Id);
+                console.log("summoner2Id : " + participant.summoner2Id);
+
+                // 소환사 룬 정보
+                const perks = participant.perks;
+                const perksStyles = perks.styles;
+                const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
+                const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
+                const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
+
+                console.log("primaryPerkId : " + primaryPerkId);
+                console.log("subPerkId : " + subPerkStyleId);
+
+                // runes.json 데이터 가져오기
+                fetch(runesJsonUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Failed to fetch JSON data");
+                        }
+                        return response.json();
+                    })
+                    .then(runes => {
+                        // 주 룬 이미지 주소 가져오기
+                        const primaryRuneInfos = runes.find(rune => rune.id === primaryPerkStyleId); // 주 룬 정보 전체 가져오기
+                        const primaryRuneInfo = primaryRuneInfos.slots[0].runes.find(rune => rune.id === primaryPerkId); // 유저의 주 룬 id와 같은 룬 정보 가져오기
+
+                        const runeIconUrl = "https://ddragon.leagueoflegends.com/cdn/img/" + primaryRuneInfo.icon; // 주 룬 아이콘 경로
+
+                        const primaryRune = document.getElementById("primaryRune");
+                        primaryRune.src = runeIconUrl
+                    })
 
             } catch (error) {
                 console.log(error.response.data.status);
