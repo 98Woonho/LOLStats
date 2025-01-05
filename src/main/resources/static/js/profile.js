@@ -1,8 +1,8 @@
-const runesJsonUrl = "/json/runes.json";
+const runesJsonUrl = '/json/runes.json';
 
-document.addEventListener("DOMContentLoaded", async function() {
+document.addEventListener('DOMContentLoaded', async function() {
     const url = new URL(window.location.href);
-    const playerName = encodeURIComponent(url.searchParams.get("playerName"));
+    const playerName = encodeURIComponent(url.searchParams.get('playerName'));
 
     try {
         const response = await axios.get('/api/puuId?playerName=' + playerName);
@@ -15,10 +15,6 @@ document.addEventListener("DOMContentLoaded", async function() {
             console.log(response.data);
 
             try {
-                for (const matchId of matchList) {
-
-                }
-
                 const response = await axios.get('/api/match?matchId=' + matchList[0]);
                 const info = response.data.info;
                 console.log(info);
@@ -26,6 +22,16 @@ document.addEventListener("DOMContentLoaded", async function() {
                 // 게임 시작 시간
                 const gameCreation = new Date(info.gameCreation);
                 console.log("게임 시작 시간 : " + gameCreation.toLocaleString());
+
+                // 타임 스탬프
+                const currentTime = new Date();
+                const timeStamp = currentTime.getTime() - info.gameCreation;
+
+                const days = Math.floor(timeStamp / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeStamp % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeStamp % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeStamp % (1000 * 60)) / 1000);
+                console.log(`시간 차이: ${days}일 ${hours}시간 ${minutes}분 ${seconds}초`);
 
                 // 게임 지속 시간
                 const gameDuration = info.gameDuration;
@@ -85,13 +91,13 @@ document.addEventListener("DOMContentLoaded", async function() {
                 const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
 
                 console.log("primaryPerkId : " + primaryPerkId);
-                console.log("subPerkId : " + subPerkStyleId);
+                console.log("subPerkStyleId : " + subPerkStyleId);
 
                 // runes.json 데이터 가져오기
                 fetch(runesJsonUrl)
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error("Failed to fetch JSON data");
+                            throw new Error('Failed to fetch JSON data');
                         }
                         return response.json();
                     })
@@ -100,12 +106,22 @@ document.addEventListener("DOMContentLoaded", async function() {
                         const primaryRuneInfos = runes.find(rune => rune.id === primaryPerkStyleId); // 주 룬 정보 전체 가져오기
                         const primaryRuneInfo = primaryRuneInfos.slots[0].runes.find(rune => rune.id === primaryPerkId); // 유저의 주 룬 id와 같은 룬 정보 가져오기
 
-                        const runeIconUrl = "https://ddragon.leagueoflegends.com/cdn/img/" + primaryRuneInfo.icon; // 주 룬 아이콘 경로
+                        const primaryRuneIconUrl = 'https://ddragon.leagueoflegends.com/cdn/img/' + primaryRuneInfo.icon; // 주 룬 아이콘 경로
 
-                        const primaryRune = document.getElementById("primaryRune");
-                        primaryRune.src = runeIconUrl
+                        const primaryRune = document.getElementById('primaryRune');
+                        primaryRune.src = primaryRuneIconUrl
+
+                        // 서브 룬 이미지 주소 가져오기
+                        const subRuneInfo = runes.find(rune => rune.id === subPerkStyleId);
+
+                        const subRuneIconUrl = 'https://ddragon.leagueoflegends.com/cdn/img/' + subRuneInfo.icon; // 서브 룬 아이콘 경로
+
+                        const subRune = document.getElementById('subRune');
+                        subRune.src = subRuneIconUrl
                     })
 
+                const matchInfo = DOMParser().parseFromString(
+                    ``, 'text/html')
             } catch (error) {
                 console.log(error.response.data.status);
             }
