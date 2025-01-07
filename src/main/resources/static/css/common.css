@@ -1,0 +1,18 @@
+body {
+    background-color: #1C1C1F;
+}
+
+header {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-top {
+    background-color: #1c1c1f;
+    height: 48px;
+}
+
+.header-bottom {
+    background-color: rgb(83, 131, 232);
+    height: 50px;
+}

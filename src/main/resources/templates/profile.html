@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
 
+    <link rel="stylesheet" th:href="@{/css/common.css}">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@4.0.1/reset.min.css"
     />
@@ -19,31 +20,457 @@
 </head>
 <body>
 
-<img id="primaryRune" src="" alt="">
-<img id="subRune" src="" alt="">
+<header>
+    <div class="header-top"></div>
+    <div class="header-bottom"></div>
+</header>
 
-<div class="match">
-    <div class="game-info">
-        <p class="queue-type">개인/2인 랭크 게임</p>
-        <p class="time-stamp">3일 전</p>
-        <p class="result">승리</p>
-        <p class="game-duration-time">23분 12초</p>
+<main>
+    <div class="summoner-profile-container">
+
     </div>
-    <div class="my-info">
-        <div class="info">
-            <div class="champion">
-                <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
-                <p>23</p>
+
+    <div class="content-container">
+        <div class="content-left"></div>
+        <div class="content-right">
+            <div class="match">
+                <div class="game-info">
+                    <p class="queue-type">개인/2인 랭크 게임</p>
+                    <p class="time-stamp">3일 전</p>
+                    <p class="result">승리</p>
+                    <p class="game-duration-time">23분 12초</p>
+                </div>
+                <div class="my-info">
+                    <div class="info">
+                        <div class="champion">
+                            <p>23</p>
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                        </div>
+                        <div class="spells">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/spell/SummonerFlash.png" alt="">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/spell/SummonerBarrier.png" alt="">
+                        </div>
+                        <div class="runes">
+                            <img class="primary-rune" src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Precision/Conqueror/Conqueror.png" alt="">
+                            <div class="sub-rune">
+                                <img src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/7200_Domination.png" alt="">
+                            </div>
+                        </div>
+                        <div class="kda-stats">
+                            <p class="kda"><span>9</span>&thinsp;/&thinsp;<span>3</span>&thinsp;/&thinsp;<span>10</span></p>
+                            <p class="kda-avg">6.33:1</p>
+                        </div>
+                    </div>
+                    <div class="items">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3153.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3152.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3044.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/1037.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/1055.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3111.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3364.png" alt="">
+                    </div>
+                </div>
+                <div class="participants">
+                    <div class="team">
+                        <div class="participant me">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>그래그래 좋았다</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 1</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 2</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 3</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 4</p>
+                        </div>
+                    </div>
+                    <div class="team">
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 5</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 6</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 7</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 8</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 9</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="match">
+                <div class="game-info">
+                    <p class="queue-type">개인/2인 랭크 게임</p>
+                    <p class="time-stamp">3일 전</p>
+                    <p class="result">승리</p>
+                    <p class="game-duration-time">23분 12초</p>
+                </div>
+                <div class="my-info">
+                    <div class="info">
+                        <div class="champion">
+                            <p>23</p>
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                        </div>
+                        <div class="spells">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/spell/SummonerFlash.png" alt="">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/spell/SummonerBarrier.png" alt="">
+                        </div>
+                        <div class="runes">
+                            <img class="primary-rune" src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Precision/Conqueror/Conqueror.png" alt="">
+                            <div class="sub-rune">
+                                <img src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/7200_Domination.png" alt="">
+                            </div>
+                        </div>
+                        <div class="kda-stats">
+                            <p class="kda"><span>9</span>&thinsp;/&thinsp;<span>3</span>&thinsp;/&thinsp;<span>10</span></p>
+                            <p class="kda-avg">6.33:1</p>
+                        </div>
+                    </div>
+                    <div class="items">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3153.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3152.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3044.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/1037.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/1055.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3111.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3364.png" alt="">
+                    </div>
+                </div>
+                <div class="participants">
+                    <div class="team">
+                        <div class="participant me">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>그래그래 좋았다</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 1</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 2</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 3</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 4</p>
+                        </div>
+                    </div>
+                    <div class="team">
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 5</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 6</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 7</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 8</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 9</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="match">
+                <div class="game-info">
+                    <p class="queue-type">개인/2인 랭크 게임</p>
+                    <p class="time-stamp">3일 전</p>
+                    <p class="result">승리</p>
+                    <p class="game-duration-time">23분 12초</p>
+                </div>
+                <div class="my-info">
+                    <div class="info">
+                        <div class="champion">
+                            <p>23</p>
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                        </div>
+                        <div class="spells">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/spell/SummonerFlash.png" alt="">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/spell/SummonerBarrier.png" alt="">
+                        </div>
+                        <div class="runes">
+                            <img class="primary-rune" src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Precision/Conqueror/Conqueror.png" alt="">
+                            <div class="sub-rune">
+                                <img src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/7200_Domination.png" alt="">
+                            </div>
+                        </div>
+                        <div class="kda-stats">
+                            <p class="kda"><span>9</span>&thinsp;/&thinsp;<span>3</span>&thinsp;/&thinsp;<span>10</span></p>
+                            <p class="kda-avg">6.33:1</p>
+                        </div>
+                    </div>
+                    <div class="items">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3153.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3152.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3044.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/1037.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/1055.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3111.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3364.png" alt="">
+                    </div>
+                </div>
+                <div class="participants">
+                    <div class="team">
+                        <div class="participant me">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>그래그래 좋았다</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 1</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 2</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 3</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 4</p>
+                        </div>
+                    </div>
+                    <div class="team">
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 5</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 6</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 7</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 8</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 9</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="match">
+                <div class="game-info">
+                    <p class="queue-type">개인/2인 랭크 게임</p>
+                    <p class="time-stamp">3일 전</p>
+                    <p class="result">승리</p>
+                    <p class="game-duration-time">23분 12초</p>
+                </div>
+                <div class="my-info">
+                    <div class="info">
+                        <div class="champion">
+                            <p>23</p>
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                        </div>
+                        <div class="spells">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/spell/SummonerFlash.png" alt="">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/spell/SummonerBarrier.png" alt="">
+                        </div>
+                        <div class="runes">
+                            <img class="primary-rune" src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Precision/Conqueror/Conqueror.png" alt="">
+                            <div class="sub-rune">
+                                <img src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/7200_Domination.png" alt="">
+                            </div>
+                        </div>
+                        <div class="kda-stats">
+                            <p class="kda"><span>9</span>&thinsp;/&thinsp;<span>3</span>&thinsp;/&thinsp;<span>10</span></p>
+                            <p class="kda-avg">6.33:1</p>
+                        </div>
+                    </div>
+                    <div class="items">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3153.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3152.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3044.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/1037.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/1055.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3111.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3364.png" alt="">
+                    </div>
+                </div>
+                <div class="participants">
+                    <div class="team">
+                        <div class="participant me">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>그래그래 좋았다</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 1</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 2</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 3</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 4</p>
+                        </div>
+                    </div>
+                    <div class="team">
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 5</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 6</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 7</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 8</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 9</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="match">
+                <div class="game-info">
+                    <p class="queue-type">개인/2인 랭크 게임</p>
+                    <p class="time-stamp">3일 전</p>
+                    <p class="result">승리</p>
+                    <p class="game-duration-time">23분 12초</p>
+                </div>
+                <div class="my-info">
+                    <div class="info">
+                        <div class="champion">
+                            <p>23</p>
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                        </div>
+                        <div class="spells">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/spell/SummonerFlash.png" alt="">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/spell/SummonerBarrier.png" alt="">
+                        </div>
+                        <div class="runes">
+                            <img class="primary-rune" src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Precision/Conqueror/Conqueror.png" alt="">
+                            <div class="sub-rune">
+                                <img src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/7200_Domination.png" alt="">
+                            </div>
+                        </div>
+                        <div class="kda-stats">
+                            <p class="kda"><span>9</span>&thinsp;/&thinsp;<span>3</span>&thinsp;/&thinsp;<span>10</span></p>
+                            <p class="kda-avg">6.33:1</p>
+                        </div>
+                    </div>
+                    <div class="items">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3153.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3152.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3044.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/1037.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/1055.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3111.png" alt="">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3364.png" alt="">
+                    </div>
+                </div>
+                <div class="participants">
+                    <div class="team">
+                        <div class="participant me">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>그래그래 좋았다</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 1</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 2</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 3</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 4</p>
+                        </div>
+                    </div>
+                    <div class="team">
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 5</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 6</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 7</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 8</p>
+                        </div>
+                        <div class="participant">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/Graves.png" alt="">
+                            <p>소환사 9</p>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
-        <div class="items">
-            
-        </div>
     </div>
-    <div>
 
-    </div>
-</div>
+</main>
+
+<footer></footer>
+
+
 
 </body>
 </html>

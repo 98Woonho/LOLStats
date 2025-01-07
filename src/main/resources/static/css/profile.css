@@ -1,21 +1,57 @@
+.summoner-profile-container {
+    background-color: #31313C;
+    height: 270px;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: row;
+    width: 1080px;
+    margin: 8px auto 0 auto;
+}
+
+.content-container .content-left {
+    width: 350px;
+    height: 10px;
+}
+
+.content-container .content-right {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 722px;
+    margin-left: 8px;
+}
+
 .match {
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    width: 100%;
+    padding: 5px 0 5px 0;
+
+    background-color: cornflowerblue;
+    border-radius: 5px;
 }
 
 .game-info {
     display: flex;
     flex-direction: column;
+    width: 140px;
 }
 
 .my-info {
     display: flex;
     flex-direction: column;
+    gap: 3px;
 }
 
 .my-info .info {
     display: flex;
     flex-direction: row;
+    gap: 5px;
 }
 
 .my-info .info .champion {
@@ -36,7 +72,102 @@
     color: white;
     background-color: dimgray;
     border-radius: 50%;
-    font-size: 0.9rem;
-    text-align: center;
+    font-size: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    bottom: 0;
+    right: 0;
+}
 
+.my-info .info .spells,
+.my-info .info .runes {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+}
+
+.my-info .info .spells img {
+    width: 20px;
+    border-radius: 5px;
+}
+
+.my-info .info .runes .primary-rune {
+    width: 20px;
+    background-color: black;
+    border-radius: 50%;
+}
+
+.my-info .info .runes .sub-rune {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.my-info .info .runes .sub-rune img {
+    width: 17px;
+}
+
+.my-info .info .kda-stats {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    margin-left: 8px;
+}
+
+.my-info .info .kda-stats .kda {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.my-info .info .kda-stats .kda-avg {
+    font-size: 12px;
+}
+
+.my-info .items {
+    display: flex;
+    gap: 2px;
+}
+
+.my-info .items img {
+    width: 20px;
+    border-radius: 5px;
+}
+
+.participants {
+    display: flex;
+}
+
+.participants .team {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.participants .participant {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100px;
+}
+
+.participants .participant img {
+    width: 17px;
+    border-radius: 5px;
+}
+
+.participants .participant.me img {
+    border-radius: 50%;
+}
+
+.participants .participant p {
+    font-size: 15px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }

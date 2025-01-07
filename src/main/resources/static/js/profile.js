@@ -61,6 +61,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 console.log("kills : " + participant.kills); // 킬 수
                 console.log("deaths : " + participant.deaths); // 데스 수
                 console.log("assists : " + participant.assists); // 어시스트 수
+                console.log("totalMinionsKilled : " + participant.totalMinionsKilled); // 미니언 킬 수
+
 
                 // Champion Square Assets : https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/<챔피언이름>.png
                 console.log("championName : " + participant.championName); // 챔피언 이름
