@@ -1,11 +1,10 @@
 const runesJsonUrl = '/json/runes.json';
 
 document.addEventListener('DOMContentLoaded', async function() {
-    const url = new URL(window.location.href);
-    const playerName = encodeURIComponent(url.searchParams.get('playerName'));
+    const summonerName = encodeURIComponent( document.getElementById('summonerName').innerText);
 
     try {
-        const response = await axios.get('/api/puuId?playerName=' + playerName);
+        const response = await axios.get('/api/puuId?summonerName=' + summonerName);
         const puuid = response.data.puuid;
         console.log(puuid);
 
@@ -15,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.log(response.data);
 
             try {
-                const response = await axios.get('/api/match?matchId=' + matchList[0]);
+                const response = await axios.get('/api/match?matchId=' + matchList[1]);
                 const info = response.data.info;
                 console.log(info);
 
@@ -56,6 +55,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                 // 게임 참가자 정보 배열
                 const participants = info.participants;
+
+                // 내 정보
+
                 const participant = participants[0];
 
                 console.log("kills : " + participant.kills); // 킬 수
@@ -110,16 +112,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                         const primaryRuneIconUrl = 'https://ddragon.leagueoflegends.com/cdn/img/' + primaryRuneInfo.icon; // 주 룬 아이콘 경로
 
-                        const primaryRune = document.getElementById('primaryRune');
-                        primaryRune.src = primaryRuneIconUrl
 
                         // 서브 룬 이미지 주소 가져오기
                         const subRuneInfo = runes.find(rune => rune.id === subPerkStyleId);
 
                         const subRuneIconUrl = 'https://ddragon.leagueoflegends.com/cdn/img/' + subRuneInfo.icon; // 서브 룬 아이콘 경로
-
-                        const subRune = document.getElementById('subRune');
-                        subRune.src = subRuneIconUrl
                     })
 
                 const matchInfo = DOMParser().parseFromString(

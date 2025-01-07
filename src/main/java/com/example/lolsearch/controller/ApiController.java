@@ -78,11 +78,11 @@ public class ApiController {
 
     // playerName으로 puuid를 가져오는 controller
     @GetMapping("/puuId")
-    public ResponseEntity<?> getPUUID(@RequestParam(value="playerName") String playerName) {
+    public ResponseEntity<?> getPUUID(@RequestParam(value="summonerName") String summonerName) {
         try {
-            String[] playerNames = playerName.split("#");
-            String gameName = playerNames[0];
-            String tagLine = playerNames[1];
+            String[] summonerNames = summonerName.split("#");
+            String gameName = summonerNames[0];
+            String tagLine = summonerNames[1];
 
             // Riot API 호출
             String response = webClient.get()

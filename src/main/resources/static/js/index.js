@@ -1,5 +1,5 @@
 function searchPlayer() {
-    const playerName = encodeURIComponent(document.getElementById('playerName').value);
+    const summonerName = encodeURIComponent(document.getElementById('summonerName').value);
 
-    location.href = `/profile?playerName=${playerName}`;
+    location.href = `/summoners/${summonerName}`;
 }
