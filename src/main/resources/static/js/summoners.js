@@ -1,10 +1,22 @@
 const runesJsonUrl = '/json/runes.json';
 
 document.addEventListener('DOMContentLoaded', async function() {
-    const summonerName = encodeURIComponent( document.getElementById('summonerName').innerText);
+    const summonerName = document.getElementById('summonerName').innerText;
+    const encodedSummonerName = encodeURIComponent(summonerName);
+
+    const matches = document.querySelectorAll('.match');
+    const detailInfos = document.querySelectorAll('.detail-info');
+
+    matches.forEach((match, index) => {
+        const detailInfoBtn = match.querySelector('.detail-info-btn');
+
+        detailInfoBtn.addEventListener('click', function() {
+            detailInfos[index].classList.toggle('opened');
+        })
+    })
 
     try {
-        const response = await axios.get('/api/puuId?summonerName=' + summonerName);
+        const response = await axios.get('/api/puuId?summonerName=' + encodedSummonerName);
         const puuid = response.data.puuid;
         console.log(puuid);
 
@@ -57,6 +69,15 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const participants = info.participants;
 
                 // 내 정보
+                const myInfo = participants.find(participant => summonerName === participant.riotIdGameName
+                 + '#' + participant.riotIdTagline);
+
+                console.log("myKills : " + myInfo.kills); // 내 킬 수
+                console.log("myDeaths : " + myInfo.deaths); // 내 데스 수
+                console.log("myAssists : " + myInfo.assists); // 내 어시스트 수
+                console.log("myTotalMinionsKilled : " + myInfo.totalMinionsKilled); // 내 미니언 킬 수
+
+
 
                 const participant = participants[0];
 
