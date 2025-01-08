@@ -86,6 +86,13 @@ document.addEventListener('DOMContentLoaded', async function() {
                 console.log("assists : " + participant.assists); // 어시스트 수
                 console.log("totalMinionsKilled : " + participant.totalMinionsKilled); // 미니언 킬 수
 
+                console.log("totalDamageDealtToChampions : " + participant.totalDamageDealtToChampions); // 챔피언에게 입힌 데미지
+
+                console.log("totalDamageTaken : " + participant.totalDamageTaken
+                ); // 챔피언에게 받은 데미지
+
+                console.log("goldEarned : " + participant.goldEarned); // 얻은 골드량
+
 
                 // Champion Square Assets : https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion/<챔피언이름>.png
                 console.log("championName : " + participant.championName); // 챔피언 이름

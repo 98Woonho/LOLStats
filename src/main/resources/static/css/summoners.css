@@ -60,16 +60,16 @@
     gap: 3px;
 }
 
-.my-info .build {
+.my-info .build,
+.detail-info table .build {
     display: flex;
     flex-direction: row;
     gap: 5px;
 }
 
-.my-info .build .champion {
+.my-info .build .champion,
+.detail-info table .build .champion {
     position: relative;
-    width: 50px;
-    height: 50px;
 }
 
 .my-info .build .champion img {
@@ -93,7 +93,9 @@
 }
 
 .my-info .build .spells,
-.my-info .build .runes {
+.my-info .build .runes,
+.detail-info table .build .spells,
+.detail-info table .build .runes {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -123,12 +125,12 @@
     width: 17px;
 }
 
-.my-info .items {
+.items {
     display: flex;
     gap: 2px;
 }
 
-.my-info .items img {
+.items img {
     width: 20px;
     border-radius: 5px;
 }
@@ -159,12 +161,83 @@
 }
 
 .detail-info {
-    height: 300px;
     background-color: #28344E;
     border-radius: 5px;
-    display: none;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: height 0.3s ease, opacity 0.3s ease;
+
+    display: flex;
+    flex-direction: column;
 }
 
 .detail-info.opened {
-    display: block;
+    height: 300px;
+    opacity: 1;
+}
+
+.detail-info table .build .champion img {
+    border-radius: 50%;
+    width: 40px;
+}
+
+.detail-info table .build .champion p {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    color: white;
+    background-color: dimgray;
+    border-radius: 50%;
+    font-size: 9px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    bottom: 0;
+    left: 0;
+}
+
+.detail-info table .build .spells img {
+    width: 16px;
+    border-radius: 5px;
+}
+
+.detail-info table .build .runes .primary-rune {
+    width: 16px;
+    background-color: black;
+    border-radius: 50%;
+}
+
+.detail-info table .build .runes .sub-rune {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.detail-info table .build .runes .sub-rune img {
+    width: 13px;
+}
+
+table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+table .summoner div {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+table td:nth-child(2) {
+    text-align: left;
+}
+
+table td:nth-child(4) div {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
 }
