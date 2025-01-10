@@ -5,10 +5,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     const encodedSummonerName = encodeURIComponent(summonerName);
 
     const matches = document.querySelectorAll('.match');
-    const detailInfos = document.querySelectorAll('.detail-info');
+    const detailInfos = document.querySelectorAll('.match-detail');
 
     matches.forEach((match, index) => {
-        const detailInfoBtn = match.querySelector('.detail-info-btn');
+        const detailInfoBtn = match.querySelector('.match-detail-btn');
 
         detailInfoBtn.addEventListener('click', function() {
             detailInfos[index].classList.toggle('opened');
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.log(response.data);
 
             try {
-                const response = await axios.get('/api/match?matchId=' + matchList[1]);
+                const response = await axios.get('/api/match?matchId=' + matchList[2]);
                 const info = response.data.info;
                 console.log(info);
 

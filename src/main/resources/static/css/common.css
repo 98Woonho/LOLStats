@@ -5,6 +5,10 @@
     font-style: normal;
 }
 
+:root {
+     --font-primary: #9E9EB1;
+ }
+
 body {
     font-family: 'Pretendard-Regular', sans-serif;
     background-color: #1C1C1F;

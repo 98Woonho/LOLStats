@@ -8,6 +8,7 @@
     flex-direction: row;
     width: 1080px;
     margin: 8px auto 0 auto;
+    color: var(--font-primary);
 }
 
 .content-container .content-left {
@@ -29,15 +30,22 @@
     gap: 8px;
 }
 
-.basic-info {
+.match-summary {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: stretch;
     width: 100%;
 
-    background-color: #28344E;
     border-radius: 5px;
+}
+
+.match.win .match-summary {
+    background-color: #28344E;
+}
+
+.match.lose .match-summary {
+    background-color: #59343B;
 }
 
 .infos {
@@ -51,7 +59,40 @@
 .game-info {
     display: flex;
     flex-direction: column;
+    gap: 6px;
     width: 140px;
+}
+
+.game-info .queue-type,
+.game-info .result {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.match.win .game-info .queue-type {
+    color: #5383E8;
+}
+
+.match.lose .game-info .queue-type {
+    color: #E84057;
+}
+
+.game-info .time-stamp,
+.game-info .game-duration-time {
+    font-size: 13px;
+}
+
+.game-info .line {
+    width: 50px;
+    height: 1px;
+}
+
+.match.win .game-info .line {
+    background-color: #2F436E;
+}
+
+.match.lose .game-info .line {
+    background-color: #703C47;
 }
 
 .my-info {
@@ -61,14 +102,14 @@
 }
 
 .my-info .build,
-.detail-info table .build {
+.match-detail table .build {
     display: flex;
     flex-direction: row;
     gap: 5px;
 }
 
 .my-info .build .champion,
-.detail-info table .build .champion {
+.match-detail table .build .champion {
     position: relative;
 }
 
@@ -94,8 +135,8 @@
 
 .my-info .build .spells,
 .my-info .build .runes,
-.detail-info table .build .spells,
-.detail-info table .build .runes {
+.match-detail table .build .spells,
+.match-detail table .build .runes {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -144,13 +185,25 @@
 .stat-info div {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-end;
 }
 
-.detail-info-btn {
+.stat-info .label {
+    font-size: 13px;
+}
+
+.stat-info .value {
+    font-size: 18px;
+    color: white;
+}
+
+.stat-info .kda .d {
+    color: #E84057;
+}
+
+.match-detail-btn {
     cursor: pointer;
     border: none;
-    background-color: #2F436E;
     width: 40px;
     border-radius: 5px;
     display: flex;
@@ -160,8 +213,15 @@
     padding-bottom: 8px;
 }
 
-.detail-info {
-    background-color: #28344E;
+.match.win .match-detail-btn {
+    background-color: #2F436E;
+}
+
+.match.lose .match-detail-btn {
+    background-color: #703C47;
+}
+
+.match-detail {
     border-radius: 5px;
     height: 0;
     opacity: 0;
@@ -170,19 +230,44 @@
 
     display: flex;
     flex-direction: column;
+    gap: 2px;
 }
 
-.detail-info.opened {
-    height: 300px;
+.match-detail .summary {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    background-color: #282830;
+}
+
+.match-detail .summary .objectives {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+}
+
+.match-detail .summary .objectives > div {
+    display: flex;
+    gap: 4px;
+    padding: 0 5px;
+}
+
+.match-detail .summary .graph {
+    width: 400px;
+}
+
+.match-detail.opened {
+    height: 100%;
     opacity: 1;
 }
 
-.detail-info table .build .champion img {
+.match-detail table .build .champion img {
     border-radius: 50%;
     width: 40px;
 }
 
-.detail-info table .build .champion p {
+.match-detail table .build .champion p {
     position: absolute;
     width: 15px;
     height: 15px;
@@ -197,18 +282,18 @@
     left: 0;
 }
 
-.detail-info table .build .spells img {
+.match-detail table .build .spells img {
     width: 16px;
     border-radius: 5px;
 }
 
-.detail-info table .build .runes .primary-rune {
+.match-detail table .build .runes .primary-rune {
     width: 16px;
     background-color: black;
     border-radius: 50%;
 }
 
-.detail-info table .build .runes .sub-rune {
+.match-detail table .build .runes .sub-rune {
     width: 16px;
     height: 16px;
     display: flex;
@@ -216,23 +301,72 @@
     align-items: center;
 }
 
-.detail-info table .build .runes .sub-rune img {
+.match-detail table .build .runes .sub-rune img {
     width: 13px;
+}
+
+table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+table thead {
+    height: 40px;
+    background-color: #31313C;
+}
+
+table th {
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+table th:nth-child(1) {
+    text-align: left;
+    padding-left: 15px;
+}
+
+table th:nth-child(1) .result {
+    font-weight: 700;
+}
+
+table.win th:nth-child(1) .result {
+    color: #5383E8;
+}
+
+table.lose th:nth-child(1) .result {
+    color: #E84057;
+}
+
+table tbody {
+    font-size: 12px;
+}
+
+table.win tbody {
+    background-color: #28344E;
+}
+
+table.lose tbody {
+    background-color: #59343B;
 }
 
 table td {
     text-align: center;
     vertical-align: middle;
-}
-
-table .summoner div {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    padding: 4px 8px;
 }
 
 table td:nth-child(2) {
     text-align: left;
+    padding-left: unset;
+}
+
+table td:nth-child(2) .summoner-name {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+
+    color: #FFF;
+    font-weight: 600;
 }
 
 table td:nth-child(4) div {
