@@ -61,7 +61,7 @@ public class ApiController {
         try {
             String response = webClient.get()
                     .uri(uriBuilder -> uriBuilder.path("/lol/match/v5/matches/by-puuid/{puuid}/ids")
-                            .queryParam("type", "ranked") // 쿼리 파라미터 추가
+                            // .queryParam("type", "ranked") // 쿼리 파라미터 추가
                             .queryParam("queue", "420")
                             .build(puuid))
                     .retrieve()
