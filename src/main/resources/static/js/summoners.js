@@ -1,5 +1,4 @@
-const runesJsonUrl = '/json/runes.json';
-const spellsJsonUrl = '/json/spells.json';
+
 const version = '15.1.1';
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -7,6 +6,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         const encodedSummonerName = encodeURIComponent(summonerName);
 
         try {
+            const res = await axios.get('/api/account?puuid=ra0SrME7z6kKtY7J5rR4eMNPtnAS2Iiip3AaTscFwyNCLscU-psrta4xlkx2qCz0sULfprEPnv3a_g');
+            console.log(res);
+
             const response = await axios.get('/api/puuId?summonerName=' + encodedSummonerName);
             const puuid = response.data.puuid;
             console.log(puuid);
@@ -166,9 +168,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                     // console.log("riotIdTagline : " + participant.riotIdTagline); // 태그 이름
                     // console.log("summonerLevel : " + participant.summonerLevel); // 소환사 레벨
 
-                    // 소환사 스펠
-                    const summoner1Id = participant.summoner1Id;
-                    const summoner2Id = participant.summoner2Id;
+                    // 스펠 이미지
+                    const spell1Img = await getSpellImgs(participant.summoner1Id);
+                    const spell2Img = await getSpellImgs(participant.summoner2Id);
 
                     // 소환사 룬 정보
                     const perks = participant.perks;
@@ -177,51 +179,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                     const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
                     const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
 
-                    let spell1Img;
-                    let spell2Img;
-
-                    // spells.json 데이터 가져오기
-                    try {
-                        const response = await fetch(spellsJsonUrl);
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch JSON data');
-                        }
-
-                        const spells = await response.json();
-
-                        // 스펠 image 가져오기
-                        spell1Img = spells.find(spell => parseInt(spell.key) === summoner1Id).image.full;
-                        spell2Img = spells.find(spell => parseInt(spell.key) === summoner2Id).image.full;
-                    } catch (error) {
-                        console.log(error);
-                    }
-
-                    let primaryRuneUrl;
-                    let subRuneUrl;
-
-                    // runes.json 데이터 가져오기
-                    try {
-                        const response = await fetch(runesJsonUrl);
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch JSON data');
-                        }
-
-                        const runes = await response.json();
-
-                        // 주 룬 이미지 주소 가져오기
-                        const primaryRuneInfos = runes.find(rune => rune.id === primaryPerkStyleId); // 주 룬 정보 전체 가져오기
-                        const primaryRuneInfo = primaryRuneInfos.slots[0].runes.find(rune => rune.id === primaryPerkId); // 유저의 주 룬 id와 같은 룬 정보 가져오기
-
-                        primaryRuneUrl = 'https://ddragon.leagueoflegends.com/cdn/img/' + primaryRuneInfo.icon; // 주 룬 이미지 경로
-
-
-                        // 서브 룬 이미지 주소 가져오기
-                        const subRuneInfo = runes.find(rune => rune.id === subPerkStyleId);
-
-                        subRuneUrl = 'https://ddragon.leagueoflegends.com/cdn/img/' + subRuneInfo.icon; // 서브 룬 경로
-                    } catch (error) {
-                        console.log(error);
-                    }
+                    // 룬 이미지 Url
+                    const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
+                    const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
 
 
                     // 팀 전체 오브젝트
@@ -466,27 +426,39 @@ document.addEventListener('DOMContentLoaded', async function () {
                     const tbody1 = tables[0].querySelector('tbody');
 
                     for (const participant of myTeamParticipants) {
+                        const spell1Img = await getSpellImgs(participant.summoner1Id);
+                        const spell2Img = await getSpellImgs(participant.summoner2Id);
+
+                        const perks = participant.perks;
+                        const perksStyles = perks.styles;
+                        const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
+                        const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
+                        const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
+
+                        const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
+                        const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
+
                         const html = `
                                 <tr>
                                 <td>
                                     <div class="build">
                                         <div class="champion">
                                             <p>23</p>
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/champion/Graves.png"
+                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/champion/${participant.championName}.png"
                                                  alt="">
                                         </div>
                                         <div class="spells">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/spell/SummonerFlash.png"
+                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/spell/${spell1Img}"
                                                  alt="">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/spell/SummonerBarrier.png"
+                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/spell/${spell2Img}"
                                                  alt="">
                                         </div>
                                         <div class="runes">
                                             <img class="primary-rune"
-                                                 src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Precision/Conqueror/Conqueror.png"
+                                                 src="${primaryRuneUrl}"
                                                  alt="">
                                             <div class="sub-rune">
-                                                <img src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/7200_Domination.png"
+                                                <img src="${subRuneUrl}"
                                                      alt="">
                                             </div>
                                         </div>
@@ -494,7 +466,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                                 </td>
                                 <td>
                                     <div>
-                                        <p class="summoner-name">그래그래 좋았다</p>
+                                        <p class="summoner-name">${participant.summonerName}</p>
                                         <p>Platinum 4</p>
                                     </div>
                                 </td>
@@ -549,76 +521,88 @@ document.addEventListener('DOMContentLoaded', async function () {
                     // 두 번째 테이블 게임 참가자 채우기
                     const tbody2 = tables[1].querySelector('tbody');
 
-                    for (const participant of myTeamParticipants) {
+                    for (const participant of enemyTeamParticipants) {
+                        const spell1Img = await getSpellImgs(participant.summoner1Id);
+                        const spell2Img = await getSpellImgs(participant.summoner2Id);
+
+                        const perks = participant.perks;
+                        const perksStyles = perks.styles;
+                        const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
+                        const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
+                        const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
+
+                        const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
+                        const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
+
                         const html = `
-                                    <tr>
-                                    <td>
-                                        <div class="build">
-                                            <div class="champion">
-                                                <p>23</p>
-                                                <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/champion/Graves.png"
+                                <tr>
+                                <td>
+                                    <div class="build">
+                                        <div class="champion">
+                                            <p>23</p>
+                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/champion/${participant.championName}.png"
+                                                 alt="">
+                                        </div>
+                                        <div class="spells">
+                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/spell/${spell1Img}"
+                                                 alt="">
+                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/spell/${spell2Img}"
+                                                 alt="">
+                                        </div>
+                                        <div class="runes">
+                                            <img class="primary-rune"
+                                                 src="${primaryRuneUrl}"
+                                                 alt="">
+                                            <div class="sub-rune">
+                                                <img src="${subRuneUrl}"
                                                      alt="">
                                             </div>
-                                            <div class="spells">
-                                                <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/spell/SummonerFlash.png"
-                                                     alt="">
-                                                <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/spell/SummonerBarrier.png"
-                                                     alt="">
-                                            </div>
-                                            <div class="runes">
-                                                <img class="primary-rune"
-                                                     src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Precision/Conqueror/Conqueror.png"
-                                                     alt="">
-                                                <div class="sub-rune">
-                                                    <img src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/7200_Domination.png"
-                                                         alt="">
-                                                </div>
-                                            </div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <div>
-                                            <p class="summoner-name">그래그래 좋았다</p>
-                                            <p>Platinum 4</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div>
-                                            <p>9/4/3</p>
-                                            <p>3.00:1</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div>
-                                            <p>15,430</p>
-                                            <p>8,382</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div>
-                                            <p>4</p>
-                                            <p>10 / 0</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div>
-                                            <p>163</p>
-                                            <p>분당 7</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="items">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/3153.png" alt="">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/3152.png" alt="">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/3044.png" alt="">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/1037.png" alt="">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/1055.png" alt="">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/3111.png" alt="">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/3364.png" alt="">
-                                        </div>
-                                    </td>
-                                </tr>
-                                `;
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <p class="summoner-name">${participant.summonerName}</p> 
+                                        <p>Platinum 4</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <p>9/4/3</p>
+                                        <p>3.00:1</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <p>15,430</p>
+                                        <p>8,382</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <p>4</p>
+                                        <p>10 / 0</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <p>163</p>
+                                        <p>분당 7</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="items">
+                                        <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/3153.png" alt="">
+                                        <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/3152.png" alt="">
+                                        <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/3044.png" alt="">
+                                        <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/1037.png" alt="">
+                                        <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/1055.png" alt="">
+                                        <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/3111.png" alt="">
+                                        <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/item/3364.png" alt="">
+                                    </div>
+                                </td>
+                            </tr>
+                            `;
 
                         // <tr>이 최상위 태그면 querySelector로 tr 태그를 가져오지 못해서 table로 감싼 뒤 가져옴.
                         const wrappedHtml = `<table>${html}</table>`;
@@ -673,4 +657,62 @@ async function getMatchListData(puuid) {
         console.error('Error fetching matchList:', error);
         throw error; // 에러를 호출자에게 전달
     }
+}
+
+// spell image를 가져오는 함수
+async function getSpellImgs (spellId) {
+    const spellsJsonUrl = '/json/spells.json';
+
+    try {
+        const response = await fetch(spellsJsonUrl);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch JSON data');
+        }
+
+        const spells = await response.json();
+
+        // 스펠 image return
+        return spells.find(spell => parseInt(spell.key) === spellId).image.full;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+// 주 룬 url을 가져오는 함수
+async function getPrimaryRuneUrl (primaryRuneStyleId, primaryRuneId) {
+    try {
+        const runesJsonUrl = '/json/runes.json';
+
+        const response = await fetch(runesJsonUrl);
+        if (!response.ok) {
+            throw new Error('Failed to fetch JSON data');
+        }
+
+        const runes = await response.json();
+
+        const primaryRuneInfos = runes.find(rune => rune.id === primaryRuneStyleId); // 주 룬 정보 전체 가져오기
+        const primaryRuneInfo = primaryRuneInfos.slots[0].runes.find(rune => rune.id === primaryRuneId); // 유저의 주 룬 id와 같은 룬 정보 가져오기
+
+        return 'https://ddragon.leagueoflegends.com/cdn/img/' + primaryRuneInfo.icon; // 주 룬 이미지 경로 return
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+// 서브 룬 url을 가져오는 함수
+async function getSubRuneUrl (subRuneStyleId) {
+    const runesJsonUrl = '/json/runes.json';
+
+    const response = await fetch(runesJsonUrl);
+    if (!response.ok) {
+        throw new Error('Failed to fetch JSON data');
+    }
+
+    const runes = await response.json();
+
+    // 서브 룬 이미지 주소 가져오기
+    const subRuneInfo = runes.find(rune => rune.id === subRuneStyleId);
+
+    return 'https://ddragon.leagueoflegends.com/cdn/img/' + subRuneInfo.icon; // 서브 룬 이미지 경로 return
 }

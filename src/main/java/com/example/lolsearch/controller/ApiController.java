@@ -105,4 +105,30 @@ public class ApiController {
             return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
         }
     }
+
+    @GetMapping("/account")
+    public ResponseEntity<?> getAccount(@RequestParam(value="puuid") String puuid) {
+        try {
+
+            // Riot API 호출
+            String response = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/riot/account/v1/accounts/by-puuid/{puuid}")
+                            .build(puuid)) //
+                    .retrieve() // 요청을 보내고 응답을 받음
+                    .bodyToMono(String.class) // 응답을 문자열로 받기
+                    .block(); // 동기 방식으로 처리
+
+            // 정상적으로 응답이 오면 ResponseEntity로 200 OK 상태와 함께 응답 본문 반환
+            return ResponseEntity.ok(response);
+        } catch (WebClientResponseException e) {
+            // WebClient에서 발생한 오류 처리
+            // HTTP 오류가 발생한 경우 (예: 404 Not Found, 401 Unauthorized 등)
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        } catch (Exception e) {
+            // 그 외의 예외 (예: 서버 내부 오류) 처리
+            // 예외 발생 시 500 상태 코드와 함께 오류 메시지 반환
+            return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+        }
+    }
 }
