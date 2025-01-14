@@ -61,7 +61,7 @@ public class ApiController {
         try {
             String response = webClient.get()
                     .uri(uriBuilder -> uriBuilder.path("/lol/match/v5/matches/by-puuid/{puuid}/ids")
-                            // .queryParam("type", "ranked") // 쿼리 파라미터 추가
+                            .queryParam("count", 100) // 쿼리 파라미터 추가
                             .queryParam("queue", "420")
                             .build(puuid))
                     .retrieve()
@@ -106,6 +106,7 @@ public class ApiController {
         }
     }
 
+    // puuid로 유저 이름 조회
     @GetMapping("/account")
     public ResponseEntity<?> getAccount(@RequestParam(value="puuid") String puuid) {
         try {
