@@ -19,6 +19,9 @@ public class ApiController {
     @Value("${riot.api.key}")
     private String RIOT_API_KEY;
 
+    @Value("${riot.dev.api.key}")
+    private String RIOT_DEV_API_KEY;
+
     private WebClient webClient;
 
     // 생성자를 사용해서 webClient를 초기화 할려고 하니, 어노테이션으로 주입받는 RIOT_API_KEY가 주입이 완료되기 전에 생성자가 RIOT_API_KEY에 접근을 할려고 해서 GET 요청에서 401(권한 없음) 오류가 발생함.
@@ -61,8 +64,6 @@ public class ApiController {
         try {
             String response = webClient.get()
                     .uri(uriBuilder -> uriBuilder.path("/lol/match/v5/matches/by-puuid/{puuid}/ids")
-                            .queryParam("count", 100) // 쿼리 파라미터 추가
-                            .queryParam("queue", "420")
                             .build(puuid))
                     .retrieve()
                     .bodyToMono(String.class)

@@ -1,6 +1,6 @@
-
 const version = '15.1.1';
 
+// TODO : API 호출 제한 때문에, API로 얻을 수 있는 소환사의 정보는 DB에 모두 저장하고, 주기적으로 갱신을 하는 방식으로 변경. 전적 검색 시 DB에 존재하지 않는 소환사는 검색했을 때 저장 및 API 호출
 document.addEventListener('DOMContentLoaded', async function () {
         const summonerName = document.getElementById('summonerName').innerText;
         const encodedSummonerName = encodeURIComponent(summonerName);
@@ -391,7 +391,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                         const tbody1 = tables[0].querySelector('tbody');
 
                         for (const participant of myTeamParticipants) {
-
                             // const account = await axios.get(`/api/account?puuid=${participant.puuid}`);
 
                             const spell1Img = await getSpellImgs(participant.summoner1Id);
@@ -533,7 +532,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                                 </td>
                                 <td>
                                     <div>
-                                        <p class="summoner-name">${participant.riotIdGameName}</p> 
+                                        <p title="${participant.riotIdGameName}#${participant.riotIdTagline}" class="summoner-name">${participant.riotIdGameName}</p>
                                         <p>Platinum 4</p>
                                     </div>
                                 </td>
