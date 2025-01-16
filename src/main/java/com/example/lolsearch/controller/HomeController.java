@@ -1,16 +1,21 @@
 package com.example.lolsearch.controller;
 
 
+import com.example.lolsearch.domain.dto.SummonerDto;
+import com.example.lolsearch.domain.dto.SummonerLeagueDto;
 import com.example.lolsearch.service.SummonerService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.List;
 
 @Controller
 @Slf4j
@@ -26,7 +31,6 @@ public class HomeController {
     @PostConstruct
     public void init() {
         this.webClient = WebClient.builder()
-                .baseUrl("https://kr.api.riotgames.com")
                 .defaultHeader("X-Riot-Token", RIOT_API_KEY)
                 .build();
     }
@@ -42,10 +46,9 @@ public class HomeController {
         return "summoners";
     }
 
-    // TODO : 현재 랭크 순위에 있는 모든 유저들 DB에 저장해야 함.
-    @ResponseBody
+    // 티어별 유저 정보를 가져오는 controller test
     @GetMapping("/test")
-    public ResponseEntity<?> testSummoners() {
+    public void testSummoners() {
         String queue = "RANKED_SOLO_5x5";
         String[] tiers = {"IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND"};
         String[] divisions = {"I", "II", "III", "IV"};
@@ -62,15 +65,28 @@ public class HomeController {
 //            }
 //        }
 
-        String response = webClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/lol/league/v4/entries/{queue}/{tier}/{division}")
-                        .queryParam("page", 500)
-                        .build(queue, "DIAMOND", "I"))
+        List<SummonerLeagueDto> summonerLeagueDtos = webClient.get()
+                .uri("https://kr.api.riotgames.com/lol/league/v4/entries/{queue}/{tier}/{division}?page=1", queue, "IRON", "I")
                 .retrieve()
-                .bodyToMono(String.class)
+                .bodyToMono(new ParameterizedTypeReference<List<SummonerLeagueDto>>() {})
                 .block();
 
-        return ResponseEntity.ok(response);
+        // tier(티어)
+        // rank(랭크)
+        // leaguePoints(LP)
+        // wins(승리 횟수)
+        // losses(패배 횟수)
+        // puuid(유저 고유 id)
+        // gameName(게임 이름)
+        // tagName(태그 이름)
+        for (SummonerLeagueDto league : summonerLeagueDtos) {
+            SummonerDto summonerDto = webClient.get()
+                    .uri("https://kr.api.riotgames.com/lol/summoner/v4/summoners/{summonerId}", league.getSummonerId())
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<com.example.lolsearch.domain.dto.SummonerDto>() {
+                    })
+                    .block();
+        }
 
 //        Summoner summoner = Summoner.builder()
 //                .puuid("test")

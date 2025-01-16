@@ -60,7 +60,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    width: 140px;
+    width: 120px;
 }
 
 .game-info .queue-type,
@@ -176,16 +176,25 @@
     border-radius: 5px;
 }
 
+.match.win .items img {
+    background-color: #3E3E73;
+}
+
+.match.lose .items img {
+    background-color: #855858;
+}
+
 .stat-info {
     display: flex;
     flex-direction: row;
-    gap: 40px;
+    gap: 10px;
 }
 
 .stat-info div {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    min-width: 70px;
 }
 
 .stat-info .label {
@@ -235,10 +244,9 @@
 
 .match-detail .summary {
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
     height: 50px;
-    gap: 25px;
     background-color: #282830;
 }
 
@@ -371,6 +379,14 @@ table.lose tbody {
     background-color: #59343B;
 }
 
+.match.win table tbody tr.me {
+    background-color: #3E4173;
+}
+
+.match.lose table tbody tr.me {
+    background-color: #7D3D3D;
+}
+
 table td {
     text-align: center;
     vertical-align: middle;
@@ -382,6 +398,12 @@ table td:nth-child(2) {
     padding-left: unset;
 }
 
+table td:nth-child(2) div p,
+table td:nth-child(3) div p,
+table td:nth-child(5) div p {
+    line-height: 15px;
+}
+
 table td:nth-child(2) .summoner-name {
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -391,9 +413,25 @@ table td:nth-child(2) .summoner-name {
     font-weight: 600;
 }
 
-table td:nth-child(4) div {
+table td:nth-child(4) .damage {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-around;
+    gap: 8px;
+}
+
+table td:nth-child(4) .damage-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+table td:nth-child(4) .graph {
+    width: 50px;
+    height: 6px;
+    background-color: #2E2E2D;
+}
+
+#loadMoreMatchesBtn {
+
 }
