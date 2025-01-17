@@ -433,5 +433,31 @@ table td:nth-child(4) .graph {
 }
 
 #loadMoreMatchesBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 35px;
+    background-color: #333242;
+    border-radius: 5px;
+    border: none;
+    color: #E8E7E5;
+    cursor: pointer;
+}
 
+#loadMoreMatchesBtn:disabled {
+    cursor: unset;
+}
+
+#loadMoreMatchesBtn .loading {
+    animation: loading 1s ease infinite;
+}
+
+@keyframes loading {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }

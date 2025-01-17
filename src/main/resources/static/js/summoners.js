@@ -1,274 +1,204 @@
 const version = '15.1.1';
+const summonerName = document.getElementById('summonerName').innerText;
+const loadMoreMatchesBtn = document.getElementById('loadMoreMatchesBtn');
+let start = 0;
 
-document.addEventListener('DOMContentLoaded', async function () {
-    const summonerName = document.getElementById('summonerName').innerText;
-    const loadMoreMatchesBtn = document.getElementById('loadMoreMatchesBtn');
+const now = new Date(); // 현재 날짜
+now.setMonth(now.getMonth() - 3); // 3개월 전 날짜
 
-    const encodedSummonerName = encodeURIComponent(summonerName);
+const startTime = Math.floor(now.getTime() / 1000); // 3개월 이전까지의 전적을 가져오기 위한 3개월 전의 Epoch Timestamp(초 단위)
 
+// 즉시 실행 함수
+(async function () {
     try {
+        const encodedSummonerName = encodeURIComponent(summonerName);
         const response = await axios.get('/api/puuId?summonerName=' + encodedSummonerName);
         const puuid = response.data.puuid;
 
-        try {
-            const matchListData = await getMatchListData(puuid);
-            const matchList = matchListData.matchList;
+        // loadMoreMatches 버튼 click 이벤트
+        loadMoreMatchesBtn.addEventListener('click', async function () {
+            loadMoreMatchesBtn.replaceChildren();
+            loadMoreMatchesBtn.setAttribute('disabled', '');
 
-            await addMatchesView(matchList, puuid, loadMoreMatchesBtn);
+            loadMoreMatchesBtn.innerHTML = `<img class="loading" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB2ElEQVR4nO2VPWtUQRSGR1ER/IDgF8RGRBMLLUX8+AkpLUxAQcTGQiwsAvkDNloIYqWCiEgqSVCwiZYiKbe/ubvnPe+ZvQv6A9SR2Sx6dze613vdK2IemGo+njNzzsw4t8kmG0DypKkkJERVT7u6IHHPiNBtikdjkYQQtg2LZYYqn6ny1Qyz+b5Os3lYVW6QrTOlpaZ4EgUG3BrqMzvaFpnqD4i74vHHk6DKFw9cKCWm4tP6kcq7QoFa89T3FEQ5MV9KbIY5Uyx7L+eKjA9hdbsp3vekH0Vk2tVFo9HYYSZnRWSf+y9JkmRn4cHtdut4zFcVYax6U2nEK0eVlzEFv5xA4tp6ccjTSmLF43yFe9XLIyLFbDdK4mEVcQy8/2rJ1ZGTVPVACGFrFTGAE0ZZ6z2rb38r11WJwZM8WJvwr+C1dYWUZ17l9shK/hnx0ffA+RDCFlcAA67nC8pU7heZN4SpLMQFBj/7NE0nSLmk2rrovd/9YzyW+sSU1JWB5BESN/N/svfNY1RobldJlqWTvUDvDIhflxJvBFWe9y/ebQ9iX5Zle0zxovudKlZi4O5PYZQPg2JS3rhxQ+Lu0I5VFsYu7nQ6e414lRMv1voqmdkhAPtrE7p/nW8ue+PYdWbC1wAAAABJRU5ErkJggg==" alt="spinner-frame-5">`
+            await loadMatchesView(puuid);
+        })
+
+        try {
+            // 초기 매치 정보 view load
+            await loadMatchesView(puuid);
         } catch (error) {
             console.log(error.response.data.status);
         }
-
     } catch (error) {
         console.log(error.response.data.status);
     }
-})
+})();
 
-// matchList를 가져오는 함수
-async function getMatchListData(puuid) {
-    const lastMatchListData = localStorage.getItem(puuid);
-
-    if (lastMatchListData) {
-        return JSON.parse(lastMatchListData);
-    }
-
+// 매치들의 정보를 보여주는 view를 불러오는 함수
+async function loadMatchesView(puuid) {
     try {
-        const response = await axios.get('/api/matchList?puuid=' + puuid);
+        const response = await axios.get(`/api/matchList?puuid=${puuid}&start=${start}&startTime=${startTime}`);
         const matchList = response.data;
 
-        const matchListData = {
-            matchList, // 전적 데이터
-            timestamp: new Date().toISOString(), // 저장한 시간 (ISO 형식)
-        };
+        // 여러 매치 정보를 한 번에 보여주기 위한 fragment
+        const matchFragment = document.createDocumentFragment();
 
-        // API로부터 데이터를 가져왔다면 localStorage에 저장
-        localStorage.setItem(puuid, JSON.stringify(matchListData));
+        for (const matchId of matchList) {
+            try {
+                const response = await axios.get('/api/match?matchId=' + matchId);
 
-        return matchListData;
-    } catch (error) {
-        console.error('Error fetching matchList:', error);
-        throw error; // 에러를 호출자에게 전달
-    }
-}
+                const info = response.data.info;
 
-// spell image를 가져오는 함수
-async function getSpellImgs(spellId) {
-    const spellsJsonUrl = '/json/spells.json';
+                // 타임 스탬프
+                const currentTime = new Date();
+                let timeStamp = currentTime.getTime() - info.gameCreation;
 
-    try {
-        const response = await fetch(spellsJsonUrl);
+                const days = Math.floor(timeStamp / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeStamp % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeStamp % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeStamp % (1000 * 60)) / 1000);
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch JSON data');
-        }
+                if (days !== 0) {
+                    timeStamp = `${days}일 전`;
+                } else if (hours !== 0) {
+                    timeStamp = `${hours}시간 전`;
+                } else if (minutes !== 0) {
+                    timeStamp = `${minutes}분 전`;
+                } else if (seconds !== 0) {
+                    timeStamp = `${seconds}초 전`;
+                } else {
+                    timeStamp = '방금 전';
+                }
 
-        const spells = await response.json();
+                // 게임 지속 시간
+                const gameDuration = info.gameDuration;
+                const gameDurationHours = Math.floor(gameDuration / 3600);
+                const gameDurationMinutes = Math.floor((gameDuration % 3600) / 60);
+                const gameDurationSeconds = gameDuration % 60;
 
-        // 스펠 image return
-        return spells.find(spell => parseInt(spell.key) === spellId).image.full;
-    } catch (error) {
-        console.log(error);
-    }
-}
+                /** QueueId
+                 * 400, 430 : 일반 게임(소환사의 협곡)
+                 * 420 : 랭크 게임(솔로/듀오)
+                 * 440 : 랭크 게임(자유랭크)
+                 * 450 : 무작위 총력전(칼바람 나락)
+                 * 900, 1010 : URF 모드
+                 * 830 : AI 상대 게임(초급 봇)
+                 * 840 : AI 상대 게임(중급 봇)
+                 * 850 : AI 상대 게임(숙련 봇)
+                 */
+                const queueId = info.queueId;
 
-// 주 룬 url을 가져오는 함수
-async function getPrimaryRuneUrl(primaryRuneStyleId, primaryRuneId) {
-    try {
-        const runesJsonUrl = '/json/runes.json';
+                // queueId에 따른 queueType
+                const queueTypes = {
+                    400: '일반',
+                    430: '일반',
+                    420: '개인/2인 랭크 게임',
+                    440: '자유 랭크 게임',
+                    450: '무작위 총력전',
+                    900: 'U.R.F',
+                    1010: 'U.R.F',
+                    830: '초급 봇',
+                    840: '중급 봇',
+                    850: '숙련 봇'
+                };
 
-        const response = await fetch(runesJsonUrl);
-        if (!response.ok) {
-            throw new Error('Failed to fetch JSON data');
-        }
+                const queueType = queueTypes[queueId] || '알 수 없는 게임 모드';
 
-        const runes = await response.json();
+                // 게임 참가자 정보 배열
+                const participants = info.participants;
 
-        const primaryRuneInfos = runes.find(rune => rune.id === primaryRuneStyleId); // 주 룬 정보 전체 가져오기
-        const primaryRuneInfo = primaryRuneInfos.slots[0].runes.find(rune => rune.id === primaryRuneId); // 유저의 주 룬 id와 같은 룬 정보 가져오기
+                // 참가자들 중, 챔피언에게 준 피해 max
+                let maxDamage = 0;
+                for (const participant of participants) {
+                    maxDamage = Math.max(maxDamage, participant.totalDamageDealtToChampions);
+                }
 
-        return 'https://ddragon.leagueoflegends.com/cdn/img/' + primaryRuneInfo.icon; // 주 룬 이미지 경로 return
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-// 서브 룬 url을 가져오는 함수
-async function getSubRuneUrl(subRuneStyleId) {
-    const runesJsonUrl = '/json/runes.json';
-
-    const response = await fetch(runesJsonUrl);
-    if (!response.ok) {
-        throw new Error('Failed to fetch JSON data');
-    }
-
-    const runes = await response.json();
-
-    // 서브 룬 이미지 주소 가져오기
-    const subRuneInfo = runes.find(rune => rune.id === subRuneStyleId);
-
-    return 'https://ddragon.leagueoflegends.com/cdn/img/' + subRuneInfo.icon; // 서브 룬 이미지 경로 return
-}
-
-// 매치들의 뷰를 추가하는 함수
-async function addMatchesView(matchList, puuid, loadMoreMatchesBtn) {
-    // 여러 매치 정보를 한 번에 보여주기 위한 fragment
-    const matchFragment = document.createDocumentFragment();
-
-    for (const matchId of matchList) {
-        try {
-            const response = await axios.get('/api/match?matchId=' + matchId);
-
-            const info = response.data.info;
-
-            // 타임 스탬프
-            const currentTime = new Date();
-            let timeStamp = currentTime.getTime() - info.gameCreation;
-
-            const days = Math.floor(timeStamp / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((timeStamp % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((timeStamp % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeStamp % (1000 * 60)) / 1000);
-
-            if (days !== 0) {
-                timeStamp = `${days}일 전`;
-            } else if (hours !== 0) {
-                timeStamp = `${hours}시간 전`;
-            } else if (minutes !== 0) {
-                timeStamp = `${minutes}분 전`;
-            } else if (seconds !== 0) {
-                timeStamp = `${seconds}초 전`;
-            } else {
-                timeStamp = '방금 전';
-            }
-
-            // 게임 지속 시간
-            const gameDuration = info.gameDuration;
-            const gameDurationHours = Math.floor(gameDuration / 3600);
-            const gameDurationMinutes = Math.floor((gameDuration % 3600) / 60);
-            const gameDurationSeconds = gameDuration % 60;
-
-            /** QueueId
-             * 400, 430 : 일반 게임(소환사의 협곡)
-             * 420 : 랭크 게임(솔로/듀오)
-             * 440 : 랭크 게임(자유랭크)
-             * 450 : 무작위 총력전(칼바람 나락)
-             * 900, 1010 : URF 모드
-             * 830 : AI 상대 게임(초급 봇)
-             * 840 : AI 상대 게임(중급 봇)
-             * 850 : AI 상대 게임(숙련 봇)
-             */
-            const queueId = info.queueId;
-
-            // queueId에 따른 queueType
-            const queueTypes = {
-                400: '일반',
-                430: '일반',
-                420: '개인/2인 랭크 게임',
-                440: '자유 랭크 게임',
-                450: '무작위 총력전',
-                900: 'U.R.F',
-                1010: 'U.R.F',
-                830: '초급 봇',
-                840: '중급 봇',
-                850: '숙련 봇'
-            };
-
-            const queueType = queueTypes[queueId] || '알 수 없는 게임 모드';
-
-            // 게임 참가자 정보 배열
-            const participants = info.participants;
-
-            // 참가자들 중, 챔피언에게 준 피해 max
-            let maxDamage = 0;
-            for (const participant of participants) {
-                maxDamage = Math.max(maxDamage, participant.totalDamageDealtToChampions);
-            }
-
-            // 참가자들 중, 받은 피해 max
-            let maxTakenDamage = 0;
-            for (const participant of participants) {
-                maxTakenDamage = Math.max(maxTakenDamage, participant.totalDamageTaken);
-            }
+                // 참가자들 중, 받은 피해 max
+                let maxTakenDamage = 0;
+                for (const participant of participants) {
+                    maxTakenDamage = Math.max(maxTakenDamage, participant.totalDamageTaken);
+                }
 
 
-            // 내 정보
-            const myInfo = participants.find(participant => puuid === participant.puuid);
+                // 내 정보
+                const myInfo = participants.find(participant => puuid === participant.puuid);
 
-            // 내 팀 Id
-            const myTeamId = myInfo.teamId;
+                // 내 팀 Id
+                const myTeamId = myInfo.teamId;
 
-            // 내 팀
-            const myTeam = info.teams.find(team => team.teamId === myTeamId);
+                // 내 팀
+                const myTeam = info.teams.find(team => team.teamId === myTeamId);
 
-            // 내 팀 오브젝트 객체
-            const myTeamObjectives = myTeam.objectives;
+                // 내 팀 오브젝트 객체
+                const myTeamObjectives = myTeam.objectives;
 
-            // 적 팀
-            const enemyTeam = info.teams.find(team => team.teamId !== myTeamId);
+                // 적 팀
+                const enemyTeam = info.teams.find(team => team.teamId !== myTeamId);
 
-            // 적 팀 오브젝트 객체
-            const enemyTeamObjectives = enemyTeam.objectives;
+                // 적 팀 오브젝트 객체
+                const enemyTeamObjectives = enemyTeam.objectives;
 
-            // 내 승패 여부
-            const isWin = myTeam.win;
+                // 내 승패 여부
+                const isWin = myTeam.win;
 
-            // 내 팀 참가자들
-            const myTeamParticipants = participants.filter(participant => participant.teamId === myTeamId);
+                // 내 팀 참가자들
+                const myTeamParticipants = participants.filter(participant => participant.teamId === myTeamId);
 
-            // 내 팀의 총 킬
-            let myTeamTotalKills = 0;
-            for (const participant of myTeamParticipants) {
-                myTeamTotalKills += participant.kills;
-            }
+                // 내 팀의 총 킬
+                let myTeamTotalKills = 0;
+                for (const participant of myTeamParticipants) {
+                    myTeamTotalKills += participant.kills;
+                }
 
-            // 내 팀의 총 골드
-            let myTeamTotalGold = 0;
-            for (const participant of myTeamParticipants) {
-                myTeamTotalGold += participant.goldEarned;
-            }
+                // 내 팀의 총 골드
+                let myTeamTotalGold = 0;
+                for (const participant of myTeamParticipants) {
+                    myTeamTotalGold += participant.goldEarned;
+                }
 
-            // 적 팀 참가자들
-            const enemyTeamParticipants = participants.filter(participant => participant.teamId !== myTeamId);
+                // 적 팀 참가자들
+                const enemyTeamParticipants = participants.filter(participant => participant.teamId !== myTeamId);
 
-            // 적 팀의 총 킬
-            let enemyTeamTotalKills = 0;
-            for (const participant of enemyTeamParticipants) {
-                enemyTeamTotalKills += participant.kills;
-            }
+                // 적 팀의 총 킬
+                let enemyTeamTotalKills = 0;
+                for (const participant of enemyTeamParticipants) {
+                    enemyTeamTotalKills += participant.kills;
+                }
 
-            // 내 팀의 총 골드
-            let enemyTeamTotalGold = 0;
-            for (const participant of enemyTeamParticipants) {
-                enemyTeamTotalGold += participant.goldEarned;
-            }
+                // 내 팀의 총 골드
+                let enemyTeamTotalGold = 0;
+                for (const participant of enemyTeamParticipants) {
+                    enemyTeamTotalGold += participant.goldEarned;
+                }
 
-            // 내 아이템
-            const myItem0 = myInfo.item0;
-            const myItem1 = myInfo.item1;
-            const myItem2 = myInfo.item2;
-            const myItem3 = myInfo.item3;
-            const myItem4 = myInfo.item4;
-            const myItem5 = myInfo.item5;
-            const myItem6 = myInfo.item6;
+                // 내 아이템
+                const myItem0 = myInfo.item0;
+                const myItem1 = myInfo.item1;
+                const myItem2 = myInfo.item2;
+                const myItem3 = myInfo.item3;
+                const myItem4 = myInfo.item4;
+                const myItem5 = myInfo.item5;
+                const myItem6 = myInfo.item6;
 
-            // 내 스펠 이미지
-            const spell1Img = await getSpellImgs(myInfo.summoner1Id);
-            const spell2Img = await getSpellImgs(myInfo.summoner2Id);
+                // 내 스펠 이미지
+                const spell1Img = await getSpellImgs(myInfo.summoner1Id);
+                const spell2Img = await getSpellImgs(myInfo.summoner2Id);
 
-            // 소환사 룬 정보
-            const perks = myInfo.perks;
-            const perksStyles = perks.styles;
-            const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
-            const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
-            const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
+                // 소환사 룬 정보
+                const perks = myInfo.perks;
+                const perksStyles = perks.styles;
+                const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
+                const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
+                const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
 
-            // 룬 이미지 Url
-            const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
-            const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
+                // 룬 이미지 Url
+                const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
+                const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
 
-            // HTML 생성
-            const match = new DOMParser().parseFromString(
-                `
+                // HTML 생성
+                const match = new DOMParser().parseFromString(
+                    `
                             <div class="match ${isWin ? "win" : "lose"}">
                                 <div class="match-summary">
                                     <div class="infos">
@@ -484,33 +414,39 @@ async function addMatchesView(matchList, puuid, loadMoreMatchesBtn) {
                             </div>
                         `, 'text/html');
 
-            // 매치 상세 정보 버튼 클릭 이벤트 추가
-            const detailInfoBtn = match.querySelector('.match-detail-btn');
-            const matchDetail = match.querySelector('.match-detail');
+                // 매치 상세 정보 버튼 클릭 이벤트 추가
+                const detailInfoBtn = match.querySelector('.match-detail-btn');
+                const matchDetail = match.querySelector('.match-detail');
 
-            detailInfoBtn.addEventListener('click', function () {
-                matchDetail.classList.toggle('opened');
-            })
+                detailInfoBtn.addEventListener('click', function () {
+                    matchDetail.classList.toggle('opened');
+                })
 
-            const tables = match.querySelectorAll('.match-detail > table');
+                const tables = match.querySelectorAll('.match-detail > table');
 
-            // 첫 번째 테이블 게임 참가자 채우기
-            const tbody1 = tables[0].querySelector('tbody');
+                const tbodies = [
+                    {tbody : tables[0].querySelector('tbody'), participants : myTeamParticipants},
+                    {tbody : tables[1].querySelector('tbody'), participants : enemyTeamParticipants},
+                ];
 
-            for (const participant of myTeamParticipants) {
-                const spell1Img = await getSpellImgs(participant.summoner1Id);
-                const spell2Img = await getSpellImgs(participant.summoner2Id);
+                // 상세 정보 테이블의 tbody에 참가자 정보 넣기
+                for (const {tbody, participants} of tbodies) {
+                    for (const participant of participants) {
+                        if (participant.championName === 'FiddleSticks') participant.championName = 'Fiddlesticks';
 
-                const perks = participant.perks;
-                const perksStyles = perks.styles;
-                const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
-                const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
-                const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
+                        const spell1Img = await getSpellImgs(participant.summoner1Id);
+                        const spell2Img = await getSpellImgs(participant.summoner2Id);
 
-                const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
-                const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
+                        const perks = participant.perks;
+                        const perksStyles = perks.styles;
+                        const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
+                        const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
+                        const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
 
-                const html = `
+                        const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
+                        const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
+
+                        const html = `
                                 <tr class="${participant.championName === myInfo.championName ? "me" : ""}">
                                 <td>
                                     <div class="build">
@@ -589,131 +525,91 @@ async function addMatchesView(matchList, puuid, loadMoreMatchesBtn) {
                             </tr>
                             `;
 
-                // <tr>이 최상위 태그면 querySelector로 tr 태그를 가져오지 못해서 table로 감싼 뒤 가져옴.
-                const wrappedHtml = `<table>${html}</table>`;
+                        // <tr>이 최상위 태그면 querySelector로 tr 태그를 가져오지 못해서 table로 감싼 뒤 가져옴.
+                        const wrappedHtml = `<table>${html}</table>`;
 
-                const participantElement = new DOMParser().parseFromString(wrappedHtml, 'text/html');
+                        const participantElement = new DOMParser().parseFromString(wrappedHtml, 'text/html');
 
-                const trElement = participantElement.querySelector('tr');
+                        const trElement = participantElement.querySelector('tr');
 
-                tbody1.appendChild(trElement);
+                        tbody.appendChild(trElement);
+                    }
+                }
+
+                matchFragment.appendChild(match.querySelector('.match'));
+            } catch (error) {
+                console.log(error.response.data.status);
             }
-
-            // 두 번째 테이블 게임 참가자 채우기
-            const tbody2 = tables[1].querySelector('tbody');
-
-            for (const participant of enemyTeamParticipants) {
-                const spell1Img = await getSpellImgs(participant.summoner1Id);
-                const spell2Img = await getSpellImgs(participant.summoner2Id);
-
-                const perks = participant.perks;
-                const perksStyles = perks.styles;
-                const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
-                const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
-                const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
-
-                const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
-                const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
-
-                const html = `
-                                <tr>
-                                <td>
-                                    <div class="build">
-                                        <div class="champion">
-                                            <p>${participant.champLevel}</p>
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/champion/${participant.championName}.png"
-                                                 alt="">
-                                        </div>
-                                        <div class="spells">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/spell/${spell1Img}"
-                                                 alt="">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/spell/${spell2Img}"
-                                                 alt="">
-                                        </div>
-                                        <div class="runes">
-                                            <img class="primary-rune"
-                                                 src="${primaryRuneUrl}"
-                                                 alt="">
-                                            <div class="sub-rune">
-                                                <img src="${subRuneUrl}"
-                                                     alt="">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        <p title="${participant.riotIdGameName}#${participant.riotIdTagline}" class="summoner-name">${participant.riotIdGameName}</p>
-                                        <p>Platinum 4</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        <p>${participant.kills}/${participant.deaths}/${participant.assists}</p>
-                                        <p>${Math.round(((myInfo.kills + myInfo.assists) / myInfo.deaths) * 100) / 100}:1</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="damage">
-                                        <div class="damage-info">
-                                            <p>${participant.totalDamageDealtToChampions}</p>
-                                            <div class="graph">
-                                                <div class="bar" style="width: ${Math.round((participant.totalDamageDealtToChampions / maxDamage) * 100)}%; height: 100%; background-color: #F24B4B"></div>
-                                            </div>
-                                        </div>
-                                        <div class="damage-info">
-                                            <p>${participant.totalDamageTaken}</p>
-                                            <div class="graph">
-                                                <div class="bar" style="width: ${Math.round((participant.totalDamageTaken / maxTakenDamage) * 100)}%; height: 100%; background-color: #9E9EB1"></div>
-                                            </div>
-                                        </div> 
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        <p>${participant.visionWardsBoughtInGame}</p>
-                                        <p>${participant.wardsKilled} / ${participant.wardsPlaced}</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        <p>${participant.neutralMinionsKilled + participant.totalMinionsKilled}</p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="items">
-                                        <img src="https://ddragon.leagueoflegends.com/cdn/${version}/img/item/${participant.item0}.png" alt="">
-                                                <img src="https://ddragon.leagueoflegends.com/cdn/${version}/img/item/${participant.item1}.png" alt="">
-                                                <img src="https://ddragon.leagueoflegends.com/cdn/${version}/img/item/${participant.item2}.png" alt="">
-                                                <img src="https://ddragon.leagueoflegends.com/cdn/${version}/img/item/${participant.item3}.png" alt="">
-                                                <img src="https://ddragon.leagueoflegends.com/cdn/${version}/img/item/${participant.item4}.png" alt="">
-                                                <img src="https://ddragon.leagueoflegends.com/cdn/${version}/img/item/${participant.item5}.png" alt="">
-                                                <img src="https://ddragon.leagueoflegends.com/cdn/${version}/img/item/${participant.item6}.png" alt="">
-                                    </div>
-                                </td>
-                            </tr>
-                            `;
-
-                // <tr>이 최상위 태그면 querySelector로 tr 태그를 가져오지 못해서 table로 감싼 뒤 가져옴.
-                const wrappedHtml = `<table>${html}</table>`;
-
-                const participantElement = new DOMParser().parseFromString(wrappedHtml, 'text/html');
-
-                const trElement = participantElement.querySelector('tr');
-
-                tbody2.appendChild(trElement);
-            }
-            matchFragment.appendChild(match.querySelector('.match'));
-        } catch (error) {
-            console.log(error.response.data.status);
         }
-    }
-    const contentRight = document.querySelector('.content-right');
+        const contentRight = document.querySelector('.content-right');
 
-    contentRight.insertBefore(matchFragment, loadMoreMatchesBtn);
+        contentRight.insertBefore(matchFragment, loadMoreMatchesBtn);
+
+        loadMoreMatchesBtn.replaceChildren();
+        loadMoreMatchesBtn.innerText = 'Load More';
+        loadMoreMatchesBtn.removeAttribute('disabled');
+
+        start += 20;
+    } catch (error) {
+        console.error('Error fetching matchList:', error);
+        throw error; // 에러를 호출자에게 전달
+    }
 }
 
-// 매치를 더 조회하는 버튼 클릭 함수
-function loadMoreMatches() {
+// spell image를 가져오는 함수
+async function getSpellImgs(spellId) {
+    const spellsJsonUrl = '/json/spells.json';
 
+    try {
+        const response = await fetch(spellsJsonUrl);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch JSON data');
+        }
+
+        const spells = await response.json();
+
+        // 스펠 image return
+        return spells.find(spell => parseInt(spell.key) === spellId).image.full;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+// 주 룬 url을 가져오는 함수
+async function getPrimaryRuneUrl(primaryRuneStyleId, primaryRuneId) {
+    try {
+        const runesJsonUrl = '/json/runes.json';
+
+        const response = await fetch(runesJsonUrl);
+        if (!response.ok) {
+            throw new Error('Failed to fetch JSON data');
+        }
+
+        const runes = await response.json();
+
+        const primaryRuneInfos = runes.find(rune => rune.id === primaryRuneStyleId); // 주 룬 정보 전체 가져오기
+        const primaryRuneInfo = primaryRuneInfos.slots[0].runes.find(rune => rune.id === primaryRuneId); // 유저의 주 룬 id와 같은 룬 정보 가져오기
+
+        return 'https://ddragon.leagueoflegends.com/cdn/img/' + primaryRuneInfo.icon; // 주 룬 이미지 경로 return
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+// 서브 룬 url을 가져오는 함수
+async function getSubRuneUrl(subRuneStyleId) {
+    const runesJsonUrl = '/json/runes.json';
+
+    const response = await fetch(runesJsonUrl);
+    if (!response.ok) {
+        throw new Error('Failed to fetch JSON data');
+    }
+
+    const runes = await response.json();
+
+    // 서브 룬 이미지 주소 가져오기
+    const subRuneInfo = runes.find(rune => rune.id === subRuneStyleId);
+
+    return 'https://ddragon.leagueoflegends.com/cdn/img/' + subRuneInfo.icon; // 서브 룬 이미지 경로 return
 }

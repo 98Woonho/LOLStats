@@ -60,10 +60,12 @@ public class ApiController {
 
     // puuid로 매치리스트를 가져오는 controller
     @GetMapping("/matchList")
-    public ResponseEntity<?> getMatchList(@RequestParam(value="puuid") String puuid) {
+    public ResponseEntity<?> getMatchList(@RequestParam(value="puuid") String puuid, @RequestParam(value="start") int start, @RequestParam(value="startTime") long startTime) {
         try {
             String response = webClient.get()
                     .uri(uriBuilder -> uriBuilder.path("/lol/match/v5/matches/by-puuid/{puuid}/ids")
+                            .queryParam("startTime", startTime)
+                            .queryParam("start", start)
                             .build(puuid))
                     .retrieve()
                     .bodyToMono(String.class)
