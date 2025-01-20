@@ -6,7 +6,7 @@
 }
 
 :root {
-     --font-primary: #9E9EB1;
+     --font-primary: #E8E7E5;
  }
 
 body {
@@ -19,12 +19,7 @@ header {
     flex-direction: column;
 }
 
-.header-top {
-    background-color: #1c1c1f;
-    height: 48px;
-}
-
-.header-bottom {
+header .content-container {
     background-color: rgb(83, 131, 232);
     height: 50px;
 }

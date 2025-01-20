@@ -12,8 +12,19 @@ const startTime = Math.floor(now.getTime() / 1000); // 3개월 이전까지의 �
 (async function () {
     try {
         const encodedSummonerName = encodeURIComponent(summonerName);
-        const response = await axios.get('/api/puuId?summonerName=' + encodedSummonerName);
+        const response = await axios.get(`/lol/puuid?summonerName=${encodedSummonerName}`);
         const puuid = response.data.puuid;
+        console.log(response);
+
+        try {
+            const response = await axios.get(`/lol/summoner?puuid=${puuid}`);
+            console.log(response);
+
+            const profileIconId = response.data.profileIconId;
+            const summonerLevel = response.data.summonerLevel;
+        } catch (error) {
+            console.log(error.response);
+        }
 
         // loadMoreMatches 버튼 click 이벤트
         loadMoreMatchesBtn.addEventListener('click', async function () {
@@ -24,21 +35,21 @@ const startTime = Math.floor(now.getTime() / 1000); // 3개월 이전까지의 �
             await loadMatchesView(puuid);
         })
 
+        // 초기 매치 정보 view load
         try {
-            // 초기 매치 정보 view load
             await loadMatchesView(puuid);
         } catch (error) {
-            console.log(error.response.data.status);
+            console.log(error.response);
         }
     } catch (error) {
-        console.log(error.response.data.status);
+        console.log(error.response);
     }
 })();
 
 // 매치들의 정보를 보여주는 view를 불러오는 함수
 async function loadMatchesView(puuid) {
     try {
-        const response = await axios.get(`/api/matchList?puuid=${puuid}&start=${start}&startTime=${startTime}`);
+        const response = await axios.get(`/lol/matchList?puuid=${puuid}&start=${start}&startTime=${startTime}`);
         const matchList = response.data;
 
         // 여러 매치 정보를 한 번에 보여주기 위한 fragment
@@ -46,7 +57,7 @@ async function loadMatchesView(puuid) {
 
         for (const matchId of matchList) {
             try {
-                const response = await axios.get('/api/match?matchId=' + matchId);
+                const response = await axios.get('/lol/match?matchId=' + matchId);
 
                 const info = response.data.info;
 
@@ -538,7 +549,7 @@ async function loadMatchesView(puuid) {
 
                 matchFragment.appendChild(match.querySelector('.match'));
             } catch (error) {
-                console.log(error.response.data.status);
+                console.log(error.response.data);
             }
         }
         const contentRight = document.querySelector('.content-right');

@@ -21,13 +21,20 @@
 <body>
 
 <header>
-    <div class="header-top"></div>
-    <div class="header-bottom"></div>
+    <div class="content-container"></div>
 </header>
 
 <main>
     <div class="summoner-profile-container">
-        <p id="summonerName" th:text="${summonerName}"></p>
+        <div class="summoner-profile">
+            <div class="profile-icon">
+                <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/profileicon/685.png" alt="">
+                <div class="summoner-level">25</div>
+            </div>
+            <div class="profile-info">
+                <p id="summonerName" th:text="${summonerName}"></p>
+            </div>
+        </div>
     </div>
 
     <div class="content-container">
