@@ -1,42 +1,46 @@
-#findPlayerBox {
+main {
+    position: relative;
+    text-align: center;
+}
+
+main > img {
+    opacity: 0.1;
+}
+
+.search-container {
     position: absolute;
-    top: 50%;
+    top: 60%;
     left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-#findPlayerBox h1 {
-    font-size: 2.5rem;
-    font-weight: 600;
-}
-
-#searchBox {
-    background-color: dimgray;
-    width: 500px;
-    height: 200px;
-    margin-top: 2rem;
-
+    transform: translateX(-50%);
+    width: 550px;
+    height: 50px;
+    background-color: #4E4E57;
+    border-radius: 20px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 1rem;
+    padding: 0 5px;
 }
 
-#searchBox input {
+.search-container input {
     width: 200px;
+    flex: 1;
+    background-color: #4E4E57;
+    color: #FFF;
     border: none;
     border-radius: 0.5rem;
-    padding: 1rem;
+    padding: 0 15px;
 }
 
-#searchBox input:focus {
+.search-container input::placeholder {
+    color: #BDBCBA;
+}
+
+.search-container input:focus {
     border: none;
     outline: none;
 }
 
-#searchBox button {
-    padding: 1rem;
-    border: none;
-    border-radius: 0.5rem;
+.search-container img {
+    cursor: pointer;
 }

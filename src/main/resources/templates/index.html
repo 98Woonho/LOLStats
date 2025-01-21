@@ -5,8 +5,9 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Val Search</title>
+    <title>LOLStats</title>
 
+    <link rel="stylesheet" th:href="@{/css/common.css}">
     <link rel="stylesheet" th:href="@{/css/index.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@4.0.1/reset.min.css"
     />
@@ -15,15 +16,36 @@
 </head>
 <body>
 
-<header></header>
+<header>
+    <div class="logo-container">
+        <a th:href="@{/}"><img src="https://fontmeme.com/permalink/250121/7ec9e6d64f6fcc3e74a03c379eedd2bc.png" alt="smooch-sans-font" border="0"></a>
+    </div>
+    <div class="menu-container">
+        <ul>
+            <li>
+                <a href="#">챔피언 정보</a>
+            </li>
+            <li>
+                <a href="#">랭킹</a>
+            </li>
+            <li>
+                <a href="#">...</a>
+            </li>
+            <li>
+                <a href="#">...</a>
+            </li>
+            <li>
+                <a href="#">...</a>
+            </li>
+        </ul>
+    </div>
+</header>
 
 <main>
-    <div id="findPlayerBox">
-        <h1>플레이어 찾기</h1>
-        <div id="searchBox">
-            <input id="summonerName" type="text" placeholder="플레이어 이름 (예 : player#KR1)">
-            <button onClick="searchPlayer()">검색</button>
-        </div>
+    <img th:src="@{/images/god.png}" alt="">
+    <div class="search-container">
+        <input id="summonerName" type="text" placeholder="플레이어 이름 (예 : player#KR1)" autocomplete="off">
+        <img onclick="searchPlayer()" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAACXBIWXMAAAsTAAALEwEAmpwYAAADy0lEQVR4nO2Y30tUQRTHhXrs938QBYLLnrm2uA8l+BCi5Q+ydO1RgiKol0BJ6EWfFB8KhfJFRMnfaASBlhLpQ9CDkN1ZtV1TK0tLXX9kqbnunjiDrntX78/dFQIPDNwZdu587vfMnDNnExIO7MDUzet0HpMZy5IZuy8z9oQDNFOj562xLPpNwn7am7S0wxzgOgfo5QCbnDHUbAB+mbGXHKCwo6DgUFzh3HZ7PmdsXBeK7d1kxj5xgKuxB0tKOsUBnlsF47tVfSbb7SdjA5ecfDYa1biamgBj3GY7EzWczNhMrOH4DuS0ZUjh1jgox/dQ8j1jJ0wDxnTPMd3D02kKTpakAisLjaSl4c/aWvQvLOD6+Dj6Ojvxa3GxGDcAecV4nDPp2o8ZGTjf3IyBtTXc0wIBXPN6cb61Fd0Oh5qrvYbipAjCBsE82dkCLLi+jkaMfsclSUtFlxHAXj2wMZcLF1+8wGAggGbs79SUnpt7NOEGHY7jWulr4uZNXHn3zhCM3+dDDAYVY3+GhrS9AuAfTUw8qgpIyV1t8rfyclNqLXR14ebKimJsubdXd9t8sNsvqQMClKpNHC8q0gRa6u5W9Gfr64VLw432q4G9XaK+/xirVZs47HRi0O8PLfZ7cFCx+HRVlaI/8+gRrg4PK8Z+VFfrhxuAx1oHpElrcviCMw8fKhafvH1b0f9WVoYrb98qxqYePNBXEOCpZUBfW1tosc937igOwcfMTBHvtu3LvXu4GOH2yVu3ogTUcDE1UiAccH1iItQfvXhRsecmbtzA+ZYWBaA3Ly86F9M1XWuyNzd3x12lpSKVhRRMT8df/f2h/lh+vkh74TaSmmpEwWJ1QEm6rDlZknBzcVEsNl1RoVCU0t1sXZ0CeLqyMtQPUBbRP8HoBshUBaQCh4Kl1gtoYU9WllDD7XSKZ2ruc+dw5MKFUJ8nJ+Pw+fOhPu1RA+ptaAZqoSLAKyNfuuvLU1Lw18AALr9+LdKgr71dxMIfNTVCyc937xp5T7cmnDgoAIVWADljuNTTg2q23Nenf0AkqUAXkK48ol6wAOjJycG5xkYRLyMvEhSidOZ7DJelHOCaVRX5VqP9R26da2jAVc5FZtHcInZ7riG4MMhn0UJyow2gI8GsUd1q1dXcXPPQNc80oFDRZjsjSsM4wckA34cATluCi4CMh5KeqOG2jepWKg1juecGrbpVy6g0pOorGtXcZk+rWRNxkjEXFThcJy1uqbVBGYKCcNz/fou00cTEo1RD0DWdrkniPgnQJJ4ZK6HE705KOrKvUAf2v9k/5mELJl5jVQgAAAAASUVORK5CYII=" alt="riot-games">
     </div>
 </main>
 

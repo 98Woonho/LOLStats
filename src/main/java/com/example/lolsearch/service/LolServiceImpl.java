@@ -33,7 +33,7 @@ public class LolServiceImpl implements LolService {
                         .build(matchId))
                 .retrieve() // 요청을 보내고 응답을 받음
                 .bodyToMono(String.class) // 응답을 문자열로 받기
-                .onErrorResume(WebClientResponseException.class, e -> Mono.error(new CustomException(HttpStatus.valueOf(e.getStatusCode().value()), e.getResponseBodyAsString()))
+                .onErrorResume(WebClientResponseException.class, e -> Mono.error(new CustomException(HttpStatus.valueOf(e.getStatusCode().value()), e.getMessage()))
                 )
                 .onErrorResume(TimeoutException.class, e -> Mono.error(new CustomException(HttpStatus.REQUEST_TIMEOUT, "Request timeout"))
                 )
@@ -56,7 +56,7 @@ public class LolServiceImpl implements LolService {
                         .build(puuid))
                 .retrieve()
                 .bodyToMono(String.class)
-                .onErrorResume(WebClientResponseException.class, e -> Mono.error(new CustomException(HttpStatus.valueOf(e.getStatusCode().value()), e.getResponseBodyAsString()))
+                .onErrorResume(WebClientResponseException.class, e -> Mono.error(new CustomException(HttpStatus.valueOf(e.getStatusCode().value()), e.getMessage()))
                 )
                 .onErrorResume(TimeoutException.class, e -> Mono.error(new CustomException(HttpStatus.REQUEST_TIMEOUT, "Request timeout"))
                 )
@@ -82,10 +82,8 @@ public class LolServiceImpl implements LolService {
                         .build(gameName, tagLine))
                 .retrieve()
                 .bodyToMono(String.class)
-                .onErrorResume(WebClientResponseException.class, e -> Mono.error(new CustomException(HttpStatus.valueOf(e.getStatusCode().value()), e.getResponseBodyAsString()))
-                )
-                .onErrorResume(TimeoutException.class, e -> Mono.error(new CustomException(HttpStatus.REQUEST_TIMEOUT, "Request timeout"))
-                )
+                .onErrorResume(WebClientResponseException.class, e ->Mono.error(new CustomException(HttpStatus.valueOf(e.getStatusCode().value()), e.getMessage())))
+                .onErrorResume(TimeoutException.class, e -> Mono.error(new CustomException(HttpStatus.REQUEST_TIMEOUT, "Request timeout")))
                 .onErrorResume(Exception.class, e -> {
                     // 이미 CustomException인 경우, 처리하지 않고 그대로 반환
                     if (e instanceof CustomException) {
@@ -97,7 +95,6 @@ public class LolServiceImpl implements LolService {
     }
 
 
-
     @Override
     public Mono<String> getAccount(String puuid) {
         return webClient.get()
@@ -106,7 +103,7 @@ public class LolServiceImpl implements LolService {
                         .build(puuid))
                 .retrieve()
                 .bodyToMono(String.class)
-                .onErrorResume(WebClientResponseException.class, e -> Mono.error(new CustomException(HttpStatus.valueOf(e.getStatusCode().value()), e.getResponseBodyAsString()))
+                .onErrorResume(WebClientResponseException.class, e -> Mono.error(new CustomException(HttpStatus.valueOf(e.getStatusCode().value()), e.getMessage()))
                 )
                 .onErrorResume(TimeoutException.class, e -> Mono.error(new CustomException(HttpStatus.REQUEST_TIMEOUT, "Request timeout"))
                 )
@@ -126,7 +123,7 @@ public class LolServiceImpl implements LolService {
                 .uri("https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/{puuid}", puuid)
                 .retrieve()
                 .bodyToMono(String.class)
-                .onErrorResume(WebClientResponseException.class, e -> Mono.error(new CustomException(HttpStatus.valueOf(e.getStatusCode().value()), e.getResponseBodyAsString()))
+                .onErrorResume(WebClientResponseException.class, e -> Mono.error(new CustomException(HttpStatus.valueOf(e.getStatusCode().value()), e.getMessage()))
                 )
                 .onErrorResume(TimeoutException.class, e -> Mono.error(new CustomException(HttpStatus.REQUEST_TIMEOUT, "Request timeout"))
                 )

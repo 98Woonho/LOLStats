@@ -1,12 +1,14 @@
 const version = '15.1.1';
 const summonerName = document.getElementById('summonerName').innerText;
 const loadMoreMatchesBtn = document.getElementById('loadMoreMatchesBtn');
+const summoner = document.getElementById('summoner');
+const error = document.getElementById('error');
+const statusCode = document.getElementById('statusCode');
+const errorMessage = document.getElementById('errorMessage');
+const homeBtn = document.getElementById('homeBtn');
 let start = 0;
 
-const now = new Date(); // 현재 날짜
-now.setMonth(now.getMonth() - 3); // 3개월 전 날짜
-
-const startTime = Math.floor(now.getTime() / 1000); // 3개월 이전까지의 전적을 가져오기 위한 3개월 전의 Epoch Timestamp(초 단위)
+homeBtn.addEventListener('click', () => location.href = '/');
 
 // 즉시 실행 함수
 (async function () {
@@ -14,16 +16,16 @@ const startTime = Math.floor(now.getTime() / 1000); // 3개월 이전까지의 �
         const encodedSummonerName = encodeURIComponent(summonerName);
         const response = await axios.get(`/lol/puuid?summonerName=${encodedSummonerName}`);
         const puuid = response.data.puuid;
+        summoner.hidden = false;
         console.log(response);
+
+        // q9T5kNwyKijvMs9I1y-pK8JIeCTfGM0bjusiOKBcHMl8iIHD_hPQg5F11_pDEvG68Yo0lLgxBEGgvA
 
         try {
             const response = await axios.get(`/lol/summoner?puuid=${puuid}`);
             console.log(response);
-
-            const profileIconId = response.data.profileIconId;
-            const summonerLevel = response.data.summonerLevel;
-        } catch (error) {
-            console.log(error.response);
+        } catch (err) {
+            console.log(err.response);
         }
 
         // loadMoreMatches 버튼 click 이벤트
@@ -33,21 +35,47 @@ const startTime = Math.floor(now.getTime() / 1000); // 3개월 이전까지의 �
 
             loadMoreMatchesBtn.innerHTML = `<img class="loading" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB2ElEQVR4nO2VPWtUQRSGR1ER/IDgF8RGRBMLLUX8+AkpLUxAQcTGQiwsAvkDNloIYqWCiEgqSVCwiZYiKbe/ubvnPe+ZvQv6A9SR2Sx6dze613vdK2IemGo+njNzzsw4t8kmG0DypKkkJERVT7u6IHHPiNBtikdjkYQQtg2LZYYqn6ny1Qyz+b5Os3lYVW6QrTOlpaZ4EgUG3BrqMzvaFpnqD4i74vHHk6DKFw9cKCWm4tP6kcq7QoFa89T3FEQ5MV9KbIY5Uyx7L+eKjA9hdbsp3vekH0Vk2tVFo9HYYSZnRWSf+y9JkmRn4cHtdut4zFcVYax6U2nEK0eVlzEFv5xA4tp6ccjTSmLF43yFe9XLIyLFbDdK4mEVcQy8/2rJ1ZGTVPVACGFrFTGAE0ZZ6z2rb38r11WJwZM8WJvwr+C1dYWUZ17l9shK/hnx0ffA+RDCFlcAA67nC8pU7heZN4SpLMQFBj/7NE0nSLmk2rrovd/9YzyW+sSU1JWB5BESN/N/svfNY1RobldJlqWTvUDvDIhflxJvBFWe9y/ebQ9iX5Zle0zxovudKlZi4O5PYZQPg2JS3rhxQ+Lu0I5VFsYu7nQ6e414lRMv1voqmdkhAPtrE7p/nW8ue+PYdWbC1wAAAABJRU5ErkJggg==" alt="spinner-frame-5">`
             await loadMatchesView(puuid);
-        })
+        });
 
         // 초기 매치 정보 view load
         try {
             await loadMatchesView(puuid);
-        } catch (error) {
-            console.log(error.response);
+        } catch (err) {
+            console.log(err);
         }
-    } catch (error) {
-        console.log(error.response);
+    } catch (err) {
+        error.hidden = false;
+        const status = err.response.status;
+        statusCode.innerText = status;
+
+        switch (status) {
+            case 404:
+                errorMessage.innerText = '소환사를 찾을 수 없습니다. 게임 이름과 태그를 다시 한 번 확인 후, 재시도 해주세요.';
+                break;
+            case 400:
+            case 401:
+            case 403:
+            case 405:
+            case 415:
+            case 429:
+            case 500:
+            case 502:
+            case 503:
+            case 504:
+                errorMessage.innerText = '서버와 통신하는 도중 오류가 발생하였습니다. 잠시 후 다시 시도해 주세요.';
+                break;
+            default:
+                errorMessage.innerText = '알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+        }
     }
 })();
 
 // 매치들의 정보를 보여주는 view를 불러오는 함수
 async function loadMatchesView(puuid) {
+    const now = new Date(); // 현재 날짜
+    now.setMonth(now.getMonth() - 3); // 3개월 전 날짜
+    const startTime = Math.floor(now.getTime() / 1000); // 3개월 이전까지의 전적을 가져오기 위한 3개월 전의 Epoch Timestamp(초 단위)
+
     try {
         const response = await axios.get(`/lol/matchList?puuid=${puuid}&start=${start}&startTime=${startTime}`);
         const matchList = response.data;
@@ -548,8 +576,8 @@ async function loadMatchesView(puuid) {
                 }
 
                 matchFragment.appendChild(match.querySelector('.match'));
-            } catch (error) {
-                console.log(error.response.data);
+            } catch (err) {
+                console.log(err.response.data);
             }
         }
         const contentRight = document.querySelector('.content-right');
@@ -561,9 +589,9 @@ async function loadMatchesView(puuid) {
         loadMoreMatchesBtn.removeAttribute('disabled');
 
         start += 20;
-    } catch (error) {
-        console.error('Error fetching matchList:', error);
-        throw error; // 에러를 호출자에게 전달
+    } catch (err) {
+        console.err('Error fetching matchList:', err);
+        throw err; // 에러를 호출자에게 전달
     }
 }
 
@@ -582,8 +610,8 @@ async function getSpellImgs(spellId) {
 
         // 스펠 image return
         return spells.find(spell => parseInt(spell.key) === spellId).image.full;
-    } catch (error) {
-        console.log(error);
+    } catch (err) {
+        console.log(err);
     }
 }
 
@@ -603,8 +631,8 @@ async function getPrimaryRuneUrl(primaryRuneStyleId, primaryRuneId) {
         const primaryRuneInfo = primaryRuneInfos.slots[0].runes.find(rune => rune.id === primaryRuneId); // 유저의 주 룬 id와 같은 룬 정보 가져오기
 
         return 'https://ddragon.leagueoflegends.com/cdn/img/' + primaryRuneInfo.icon; // 주 룬 이미지 경로 return
-    } catch (error) {
-        console.log(error);
+    } catch (err) {
+        console.log(err);
     }
 }
 
