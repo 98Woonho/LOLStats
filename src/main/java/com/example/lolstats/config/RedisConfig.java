@@ -1,4 +1,4 @@
-package com.example.lolsearch.config;
+package com.example.lolstats.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.example.lolsearch.domain.dto;
+package com.example.lolstats.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

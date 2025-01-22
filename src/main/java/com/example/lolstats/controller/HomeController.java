@@ -1,9 +1,9 @@
-package com.example.lolsearch.controller;
+package com.example.lolstats.controller;
 
 
-import com.example.lolsearch.domain.dto.SummonerDto;
-import com.example.lolsearch.domain.dto.SummonerLeagueDto;
-import com.example.lolsearch.service.SummonerService;
+import com.example.lolstats.domain.dto.SummonerDto;
+import com.example.lolstats.domain.dto.SummonerLeagueDto;
+import com.example.lolstats.service.SummonerService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +39,8 @@ public class HomeController {
         return "index";
     }
 
-    @GetMapping("/summoners/{summonerName}")
-    public String getSummoners(@PathVariable(value = "summonerName") String summonerName, Model model) {
+    @GetMapping("/summoners")
+    public String getSummoners(@RequestParam(value = "summonerName") String summonerName, Model model) {
         model.addAttribute("summonerName", summonerName);
         return "summoners";
     }
@@ -82,7 +82,7 @@ public class HomeController {
             SummonerDto summonerDto = webClient.get()
                     .uri("https://kr.api.riotgames.com/lol/summoner/v4/summoners/{summonerId}", league.getSummonerId())
                     .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<com.example.lolsearch.domain.dto.SummonerDto>() {
+                    .bodyToMono(new ParameterizedTypeReference<com.example.lolstats.domain.dto.SummonerDto>() {
                     })
                     .block();
         }

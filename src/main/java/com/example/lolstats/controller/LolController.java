@@ -1,7 +1,7 @@
-package com.example.lolsearch.controller;
+package com.example.lolstats.controller;
 
-import com.example.lolsearch.exception.CustomException;
-import com.example.lolsearch.service.LolService;
+import com.example.lolstats.exception.CustomException;
+import com.example.lolstats.service.LolService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

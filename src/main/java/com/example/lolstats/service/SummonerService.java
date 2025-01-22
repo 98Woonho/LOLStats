@@ -1,7 +1,7 @@
-package com.example.lolsearch.service;
+package com.example.lolstats.service;
 
-import com.example.lolsearch.domain.entity.Summoner;
-import com.example.lolsearch.domain.repository.SummonerRepository;
+import com.example.lolstats.domain.entity.Summoner;
+import com.example.lolstats.domain.repository.SummonerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

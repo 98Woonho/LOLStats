@@ -1,4 +1,4 @@
-package com.example.lolsearch.service;
+package com.example.lolstats.service;
 
 import reactor.core.publisher.Mono;
 

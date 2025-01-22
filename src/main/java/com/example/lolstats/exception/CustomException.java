@@ -1,8 +1,7 @@
-package com.example.lolsearch.exception;
+package com.example.lolstats.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor

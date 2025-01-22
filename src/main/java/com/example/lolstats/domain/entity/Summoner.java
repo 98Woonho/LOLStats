@@ -1,4 +1,4 @@
-package com.example.lolsearch.domain.entity;
+package com.example.lolstats.domain.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

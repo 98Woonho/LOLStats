@@ -1,5 +1,4 @@
 const version = '15.1.1';
-const summonerName = document.getElementById('summonerName').innerText;
 const loadMoreMatchesBtn = document.getElementById('loadMoreMatchesBtn');
 const summoner = document.getElementById('summoner');
 const error = document.getElementById('error');
@@ -13,13 +12,31 @@ homeBtn.addEventListener('click', () => location.href = '/');
 // 즉시 실행 함수
 (async function () {
     try {
+        const urlParams = new URLSearchParams(window.location.search); // 현재 URL에서 쿼리 파라미터를 가져오기
+        const summonerName = urlParams.get('summonerName'); // summonerName 파라미터 값 가져오기
+
+        // summonerName 파라미터 값에 #가 포함되어 있는지 검사
+        if (!summonerName.includes('#')) {
+            // #가 포함되어 있지 안으면 404 throw
+            throw {response: {status: 404}};
+        }
+
         const encodedSummonerName = encodeURIComponent(summonerName);
         const response = await axios.get(`/lol/puuid?summonerName=${encodedSummonerName}`);
+
+        // 응답으로 온 gameName과 tagLine이 summonerName parameter와 같은지 검사
+        const gameName = summonerName.split('#')[0];
+        const tagLine = summonerName.split('#')[1];
+
+        if (response.data.gameName !== gameName || response.data.tagLine !== tagLine) {
+            // gameName과 tagLine중 하나라도 같지 않으면 404 throw
+            throw {response: {status: 404}};
+        }
+
         const puuid = response.data.puuid;
         summoner.hidden = false;
-        console.log(response);
 
-        // q9T5kNwyKijvMs9I1y-pK8JIeCTfGM0bjusiOKBcHMl8iIHD_hPQg5F11_pDEvG68Yo0lLgxBEGgvA
+        saveRecentSearch(summonerName); // 로컬 스토리지의 recentSearches에 소환사 이름 저장
 
         try {
             const response = await axios.get(`/lol/summoner?puuid=${puuid}`);
@@ -651,4 +668,19 @@ async function getSubRuneUrl(subRuneStyleId) {
     const subRuneInfo = runes.find(rune => rune.id === subRuneStyleId);
 
     return 'https://ddragon.leagueoflegends.com/cdn/img/' + subRuneInfo.icon; // 서브 룬 이미지 경로 return
+}
+
+// 검색한 소환사 이름을 최근 검색 로컬 스토리지에 저장하는 함수
+function saveRecentSearch(summonerName) {
+    const max = 10;
+    let recentSearches = JSON.parse(localStorage.getItem('recentSearches')) || [];
+
+    recentSearches = recentSearches.filter(search => search !== summonerName);
+    recentSearches.unshift(summonerName); // 검색한 소환사 이름 맨 앞에 추가
+
+    if (recentSearches.length > max) {
+        recentSearches.pop();
+    }
+
+    localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
 }

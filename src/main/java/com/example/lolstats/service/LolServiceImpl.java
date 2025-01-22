@@ -1,10 +1,9 @@
-package com.example.lolsearch.service;
+package com.example.lolstats.service;
 
-import com.example.lolsearch.exception.CustomException;
+import com.example.lolstats.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
