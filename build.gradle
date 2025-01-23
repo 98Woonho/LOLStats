@@ -6,7 +6,7 @@ plugins {
 
 bootJar {
     archiveFileName = 'demo-0.0.1-SNAPSHOT.jar'
-    destinationDirectory = file("$buildDir/libs") // JAR 파일이 저장될 디렉토리
+    destinationDirectory = file("$projectDir/build/libs")
 }
 
 group = 'com.example'
