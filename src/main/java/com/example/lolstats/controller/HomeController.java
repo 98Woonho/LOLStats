@@ -34,6 +34,7 @@ public class HomeController {
                 .build();
     }
 
+    // home
     @GetMapping("/")
     public String home() {
         return "index";
