@@ -55,7 +55,7 @@ tasks.named('test') {
 }
 
 bootJar {
-    mainClassName = 'com.example.lolstats.LOLStatsApplication'
+    mainClass = 'com.example.lolstats.LOLStatsApplication'
 }
 
 bootRun {
