@@ -53,9 +53,3 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-// Spring Boot JAR 설정
-tasks.named('bootJar') {
-    // destinationDirectory 설정을 통해 JAR 파일이 생성될 디렉토리 지정
-    destinationDirectory = file("$buildDir/libs")
-}
