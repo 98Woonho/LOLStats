@@ -9,9 +9,9 @@ public class DataSourceConfig {
     @Bean
     public HikariDataSource dataSource() {
         HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/lol_stats");
-        dataSource.setUsername("root");
-        dataSource.setPassword("1234");
+        dataSource.setJdbcUrl("jdbc:mysql://3.39.136.140:3306/lol_stats");
+        dataSource.setUsername("awsdb");
+        dataSource.setPassword("Woonho98@@!!");
 
         return dataSource;
     }
