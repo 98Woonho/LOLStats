@@ -6,13 +6,21 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class DataSourceConfig {
+    @Value("${spring.datasource.url}")
+    private String jdbcUrl;
+
+    @Value("${spring.datasource.username}")
+    private String username;
+
+    @Value("${spring.datasource.password}")
+    private String password;
+
     @Bean
     public HikariDataSource dataSource() {
         HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl("jdbc:mysql://3.39.136.140:3306/lol_stats");
-        dataSource.setUsername("awsdb");
-        dataSource.setPassword("Woonho98@@!!");
-
+        dataSource.setJdbcUrl(jdbcUrl);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
         return dataSource;
     }
 }
