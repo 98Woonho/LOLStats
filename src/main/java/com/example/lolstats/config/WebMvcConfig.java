@@ -12,10 +12,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/**").addResourceLocations("classpath:/public/"); //.setCachePeriod(60*60*24*365);
-        registry.addResourceHandler("/js/**").addResourceLocations("classpath:/static/js/"); //.setCachePeriod(60*60*24*365);
-        registry.addResourceHandler("/css/**").addResourceLocations("classpath:/static/css/"); //.setCachePeriod(60*60*24*365);
-        registry.addResourceHandler("/images/**").addResourceLocations("classpath:/static/images/"); //.setCachePeriod(60*60*24*365);
+        registry.addResourceHandler("/**") // 모든 요청에 대해 정적 리소스 제공
+                .addResourceLocations("classpath:/static/", "classpath:/public/"); // riot.txt가 있는 public 포함
     }
 
 }
