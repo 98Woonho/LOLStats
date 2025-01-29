@@ -15,5 +15,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/**") // 모든 요청에 대해 정적 리소스 제공
                 .addResourceLocations("classpath:/static/", "classpath:/public/"); // riot.txt가 있는 public 포함
     }
-
 }
