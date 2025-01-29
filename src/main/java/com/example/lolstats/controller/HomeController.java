@@ -36,10 +36,6 @@ public class HomeController {
                 .build();
     }
 
-    @GetMapping("/riot")
-    public void riot() {
-    }
-
     // home
     @GetMapping("/")
     public String home() {
