@@ -38,7 +38,7 @@ public class HomeController {
 
     @GetMapping("/riot.txt")
     public String riotTxt() {
-        return "riot.txt";
+        return "riot";
     }
 
     // home
