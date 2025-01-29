@@ -36,7 +36,7 @@ public class HomeController {
                 .build();
     }
 
-    @GetMapping("/riot.txt")
+    @GetMapping("/riot")
     public String riotTxt() {
         return "riot";
     }
