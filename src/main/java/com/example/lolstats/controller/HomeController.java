@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +34,11 @@ public class HomeController {
         this.webClient = WebClient.builder()
                 .defaultHeader("X-Riot-Token", RIOT_API_KEY)
                 .build();
+    }
+
+    @GetMapping("/riot.txt")
+    public Resource getRiotTxt() {
+        return new ClassPathResource("static/riot.txt");
     }
 
     // home
