@@ -37,7 +37,7 @@ public class HomeController {
     }
 
     @GetMapping("/riot")
-    public void getRiot() {
+    public void riot() {
     }
 
     // home
