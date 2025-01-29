@@ -37,6 +37,7 @@ public class HomeController {
     }
 
     @GetMapping("/riot.txt")
+    @ResponseBody
     public Resource getRiotTxt() {
         return new ClassPathResource("static/riot.txt");
     }
