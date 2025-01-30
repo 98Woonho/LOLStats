@@ -10,13 +10,6 @@ main {
     opacity: 0.1;
 }
 
-.search-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
 .search-container form {
     width: 550px;
     height: 50px;
@@ -48,56 +41,10 @@ main {
     outline: none;
 }
 
-.search-container form button {
+.search-container button {
     background-color: unset;
     border: none;
     padding: 0;
     line-height: 0;
-    cursor: pointer;
-}
-
-#resentSearchContainer {
-    width: 400px;
-    background-color: #4E4E57;
-    margin-left: 20px;
-    border-radius: 5px;
-}
-
-#resentSearchContainer .title {
-    color: #9E9EB1;
-    text-align: center;
-    padding: 15px 0;
-    border-bottom: 1px solid #A7A7BA;
-}
-
-#resentSearchContainer ul li {
-    text-align: left;
-    padding: 10px;
-    color: var(--font-primary);
-    font-size: 14px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#resentSearchContainer ul li:hover {
-    background-color: #303036;
-}
-
-#resentSearchContainer ul li a {
-    flex: 1;
-}
-
-#resentSearchContainer ul li a .tag-line {
-    color: #BDBCBA;
-    margin-left: 3px;
-}
-
-#resentSearchContainer ul li .delete-recent-search-btn {
-    border: none;
-    background-color: unset;
-    line-height: 0;
-    padding: 0;
     cursor: pointer;
 }

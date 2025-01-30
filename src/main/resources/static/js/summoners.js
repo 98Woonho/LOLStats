@@ -1,13 +1,14 @@
 const version = '15.1.1';
-const loadMoreMatchesBtn = document.getElementById('loadMoreMatchesBtn');
-const summoner = document.getElementById('summoner');
-const error = document.getElementById('error');
-const statusCode = document.getElementById('statusCode');
-const errorMessage = document.getElementById('errorMessage');
-const homeBtn = document.getElementById('homeBtn');
+const main = document.getElementById('main');
 let start = 0;
 
-homeBtn.addEventListener('click', () => location.href = '/');
+// loadingContainer DOM
+const loadingContainer = new DOMParser().parseFromString(`
+    <div id="loadingContainer" class="loading-container">
+        <img class="icon" src="data:image/svg+xml; charset=utf-8;utf8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgaWQ9IkxlYWd1ZU9mTGVnZW5kcyI+CiAgPHBhdGggZD0iTTM1LDM3LjEzQTE0LjM4LDE0LjM4LDAsMCwwLDI0LDEzLjQ2YTExLjUxLDExLjUxLDAsMCwwLTEuNDUuMVYxMC42OEgxMS44N2wyLjkyLDMuNTh2Mi41NmExNC4yOSwxNC4yOSwwLDAsMC0uMTgsMjJsLTMuMTIsMy41SDM0bDQuNjQtNS4xNlpNMjQsMTQuNjRBMTMuMjEsMTMuMjEsMCwwLDEsMzMuNCwzNy4xM0gzMS45NGExMi4yMSwxMi4yMSwwLDAsMC04LTIxLjQ5LDExLjY2LDExLjY2LDAsMCwwLTEuNDYuMTF2LTFBMTMuOTQsMTMuOTQsMCwwLDEsMjQsMTQuNjRabS0xLjQ3LDEuN0ExMS44MiwxMS44MiwwLDAsMSwyNCwxNi4yM2ExMS42MiwxMS42MiwwLDAsMSw3LDIwLjlIMjIuNDJaTTE0Ljg1LDM1LjA3YTExLjUzLDExLjUzLDAsMCwxLDAtMTQuMzRabS00LjExLTcuMTlhMTMuMTUsMTMuMTUsMCwwLDEsNC4wNi05LjQ5djEuNDJhMTIuMTQsMTIuMTQsMCwwLDAsMCwxNi4xOHYxLjQzQTEzLjE3LDEzLjE3LDAsMCwxLDEwLjc0LDI3Ljg4Wk0zMy41LDQxLjExSDE0LjEzTDE2LDM5LDE2LDEzLjg0bC0xLjYyLTJoN2wtLjEyLDI2LjQ1SDM2WiIgZmlsbD0iI2ZmZjlmOSIgY2xhc3M9ImNvbG9yMDAwMDAwIHN2Z1NoYXBlIj48L3BhdGg+Cjwvc3ZnPgo=" alt="">
+        <div class="dark-box"></div>
+    </div>
+`, 'text/html').getElementById('loadingContainer');
 
 // 즉시 실행 함수
 (async function () {
@@ -34,40 +35,73 @@ homeBtn.addEventListener('click', () => location.href = '/');
         }
 
         const puuid = response.data.puuid;
-        summoner.hidden = false;
 
         saveRecentSearch(summonerName); // 로컬 스토리지의 recentSearches에 소환사 이름 저장
 
         try {
+            main.appendChild(loadingContainer);
+
             const response = await axios.get(`/lol/summoner?puuid=${puuid}`);
-            console.log(response);
+            const profileIconId = response.data.profileIconId;
+            const summonerLevel = response.data.summonerLevel;
+
+            const summoner = new DOMParser().parseFromString(`
+                <div id="summoner">
+                    <div class="summoner-profile-container">
+                        <div class="summoner-profile">
+                            <div class="profile-icon">
+                                <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/profileicon/${profileIconId}.png" alt="">
+                                <div class="summoner-level">${summonerLevel}</div>
+                            </div>
+                            <div class="profile-info">
+                                <p class="summoner-name">${summonerName}</p>
+                                <button class="renew-record-btn">전적 갱신</button>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="content-container" id="contentContainer">
+                        <div class="content-left"></div>
+                        <div class="content-right">
+                            <button class="load-more-matches-btn">Load More</button>
+                        </div>
+                    </div>
+                </div>
+            `, 'text/html').getElementById('summoner');
+
+            const loadMoreMatchesBtn = summoner.querySelector('.load-more-matches-btn');
+            const renewRecordBtn = summoner.querySelector('.renew-record-btn');
+            const contentRight = summoner.querySelector('.content-right');
+
+            // renewRecordBtn click event
+            renewRecordBtn.addEventListener('click', function() {
+                localStorage.setItem('renewRecordTime', JSON.stringify(new Date()));
+            });
+
+            // loadMoreMatchesBtn click event
+            loadMoreMatchesBtn.addEventListener('click', async function () {
+                loadMoreMatchesBtn.replaceChildren();
+                loadMoreMatchesBtn.setAttribute('disabled', '');
+
+                loadMoreMatchesBtn.innerHTML = `<img class="loading" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB2ElEQVR4nO2VPWtUQRSGR1ER/IDgF8RGRBMLLUX8+AkpLUxAQcTGQiwsAvkDNloIYqWCiEgqSVCwiZYiKbe/ubvnPe+ZvQv6A9SR2Sx6dze613vdK2IemGo+njNzzsw4t8kmG0DypKkkJERVT7u6IHHPiNBtikdjkYQQtg2LZYYqn6ny1Qyz+b5Os3lYVW6QrTOlpaZ4EgUG3BrqMzvaFpnqD4i74vHHk6DKFw9cKCWm4tP6kcq7QoFa89T3FEQ5MV9KbIY5Uyx7L+eKjA9hdbsp3vekH0Vk2tVFo9HYYSZnRWSf+y9JkmRn4cHtdut4zFcVYax6U2nEK0eVlzEFv5xA4tp6ccjTSmLF43yFe9XLIyLFbDdK4mEVcQy8/2rJ1ZGTVPVACGFrFTGAE0ZZ6z2rb38r11WJwZM8WJvwr+C1dYWUZ17l9shK/hnx0ffA+RDCFlcAA67nC8pU7heZN4SpLMQFBj/7NE0nSLmk2rrovd/9YzyW+sSU1JWB5BESN/N/svfNY1RobldJlqWTvUDvDIhflxJvBFWe9y/ebQ9iX5Zle0zxovudKlZi4O5PYZQPg2JS3rhxQ+Lu0I5VFsYu7nQ6e414lRMv1voqmdkhAPtrE7p/nW8ue+PYdWbC1wAAAABJRU5ErkJggg==" alt="spinner-frame-5">`
+
+                await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn);
+            });
+
+            await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn);
+            main.replaceChildren();
+            main.appendChild(summoner);
         } catch (err) {
-            console.log(err.response);
-        }
-
-        // loadMoreMatches 버튼 click 이벤트
-        loadMoreMatchesBtn.addEventListener('click', async function () {
-            loadMoreMatchesBtn.replaceChildren();
-            loadMoreMatchesBtn.setAttribute('disabled', '');
-
-            loadMoreMatchesBtn.innerHTML = `<img class="loading" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB2ElEQVR4nO2VPWtUQRSGR1ER/IDgF8RGRBMLLUX8+AkpLUxAQcTGQiwsAvkDNloIYqWCiEgqSVCwiZYiKbe/ubvnPe+ZvQv6A9SR2Sx6dze613vdK2IemGo+njNzzsw4t8kmG0DypKkkJERVT7u6IHHPiNBtikdjkYQQtg2LZYYqn6ny1Qyz+b5Os3lYVW6QrTOlpaZ4EgUG3BrqMzvaFpnqD4i74vHHk6DKFw9cKCWm4tP6kcq7QoFa89T3FEQ5MV9KbIY5Uyx7L+eKjA9hdbsp3vekH0Vk2tVFo9HYYSZnRWSf+y9JkmRn4cHtdut4zFcVYax6U2nEK0eVlzEFv5xA4tp6ccjTSmLF43yFe9XLIyLFbDdK4mEVcQy8/2rJ1ZGTVPVACGFrFTGAE0ZZ6z2rb38r11WJwZM8WJvwr+C1dYWUZ17l9shK/hnx0ffA+RDCFlcAA67nC8pU7heZN4SpLMQFBj/7NE0nSLmk2rrovd/9YzyW+sSU1JWB5BESN/N/svfNY1RobldJlqWTvUDvDIhflxJvBFWe9y/ebQ9iX5Zle0zxovudKlZi4O5PYZQPg2JS3rhxQ+Lu0I5VFsYu7nQ6e414lRMv1voqmdkhAPtrE7p/nW8ue+PYdWbC1wAAAABJRU5ErkJggg==" alt="spinner-frame-5">`
-            await loadMatchesView(puuid);
-        });
-
-        // 초기 매치 정보 view load
-        try {
-            await loadMatchesView(puuid);
-        } catch (err) {
-            console.log(err);
+            console.error(err);
+            alert('정보를 불러오는데 오류가 발생하였습니다. 잠시 후 다시 시도해주세요');
         }
     } catch (err) {
-        error.hidden = false;
+        let errorMessage;
         const status = err.response.status;
-        statusCode.innerText = status;
 
         switch (status) {
             case 404:
-                errorMessage.innerText = '소환사를 찾을 수 없습니다. 게임 이름과 태그를 다시 한 번 확인 후, 재시도 해주세요.';
+                errorMessage = '소환사를 찾을 수 없습니다. 게임 이름과 태그를 다시 한 번 확인 후, 재시도 해주세요.';
                 break;
             case 400:
             case 401:
@@ -79,16 +113,29 @@ homeBtn.addEventListener('click', () => location.href = '/');
             case 502:
             case 503:
             case 504:
-                errorMessage.innerText = '서버와 통신하는 도중 오류가 발생하였습니다. 잠시 후 다시 시도해 주세요.';
+                errorMessage = '서버와 통신하는 도중 오류가 발생하였습니다. 잠시 후 다시 시도해 주세요.';
                 break;
             default:
-                errorMessage.innerText = '알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+                errorMessage = '알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
         }
+
+        const error = new DOMParser().parseFromString(`
+        <div class="error">
+            <h1 class="status-code">${status}</h1>
+            <p class="error-message">${errorMessage}</p>
+            <button class="home-btn">Home</button>
+        </div>`, 'text/html').querySelector('.error');
+
+        // homeBtn click event
+        const homeBtn = error.querySelector('.home-btn');
+        homeBtn.addEventListener('click', () => location.href = '/');
+
+        main.appendChild(error);
     }
 })();
 
-// 매치들의 정보를 보여주는 view를 불러오는 함수
-async function loadMatchesView(puuid) {
+// 매치들 정보 DOM을 추가하는 함수
+async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
     const now = new Date(); // 현재 날짜
     now.setMonth(now.getMonth() - 3); // 3개월 전 날짜
     const startTime = Math.floor(now.getTime() / 1000); // 3개월 이전까지의 전적을 가져오기 위한 3개월 전의 Epoch Timestamp(초 단위)
@@ -98,7 +145,7 @@ async function loadMatchesView(puuid) {
         const matchList = response.data;
 
         // 여러 매치 정보를 한 번에 보여주기 위한 fragment
-        const matchFragment = document.createDocumentFragment();
+        const matchesFragment = document.createDocumentFragment();
 
         for (const matchId of matchList) {
             try {
@@ -592,22 +639,20 @@ async function loadMatchesView(puuid) {
                     }
                 }
 
-                matchFragment.appendChild(match.querySelector('.match'));
+                matchesFragment.appendChild(match.querySelector('.match'));
             } catch (err) {
                 console.log(err.response.data);
             }
         }
-        const contentRight = document.querySelector('.content-right');
 
-        contentRight.insertBefore(matchFragment, loadMoreMatchesBtn);
-
+        contentRight.insertBefore(matchesFragment, loadMoreMatchesBtn);
         loadMoreMatchesBtn.replaceChildren();
-        loadMoreMatchesBtn.innerText = 'Load More';
         loadMoreMatchesBtn.removeAttribute('disabled');
+        loadMoreMatchesBtn.innerText = 'Load More';
 
         start += 20;
     } catch (err) {
-        console.err('Error fetching matchList:', err);
+        console.log('Error fetching matchList:', err);
         throw err; // 에러를 호출자에게 전달
     }
 }
