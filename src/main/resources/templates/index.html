@@ -11,6 +11,8 @@
     />
     <link rel="stylesheet" th:href="@{/css/common.css}">
     <link rel="stylesheet" th:href="@{/css/index.css}">
+
+    <script defer th:src="@{/js/common.js}"></script>
     <script defer th:src="@{/js/index.js}"></script>
 </head>
 <body>
@@ -54,7 +56,7 @@
                      alt="riot-games">
             </button>
         </form>
-        <div hidden id="resentSearchContainer">
+        <div hidden id="recentSearchContainer" class="recent-search-container">
             <div class="title">
                 최근 검색
             </div>

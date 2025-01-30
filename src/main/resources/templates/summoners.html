@@ -12,6 +12,7 @@
     <link rel="stylesheet" th:href="@{/css/common.css}">
     <link rel="stylesheet" th:href="@{/css/summoners.css}">
 
+    <script defer th:src="@{/js/common.js}"></script>
     <script defer th:src="@{/js/summoners.js}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"
             integrity="sha512-uMtXmF28A2Ab/JJO2t/vYhlaa/3ahUOgj1Zf27M5rOo8/+fcTUVH0/E0ll68njmjrLqOBjXM3V9NiPFL5ywWPQ=="
@@ -23,6 +24,22 @@
 <header>
     <div class="logo-container">
         <a th:href="@{/}"><img src="https://fontmeme.com/permalink/250121/7ec9e6d64f6fcc3e74a03c379eedd2bc.png" alt="smooch-sans-font" border="0"></a>
+    </div>
+    <div style="position: relative; height: 50px; background-color: #3E3E45">
+        <div class="search-container">
+            <form action="/summoners" method="GET">
+                <input id="summonerName" name="summonerName" type="text" placeholder="플레이어 이름 (예 : player#KR1)"
+                       autocomplete="off" required>
+                <button type="submit">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAC3UlEQVR4nO2WS0/bQBDHLbWfoI+vUCGKZ2wihQKCSNw5hohy4RugFr4BggMcOXBqSFoEohIHHgcEhyBxgAOqiB0HqkAolYLaJhDCq4EmbLXrxjyy69gE9dL+pVHG8mZ/69nZ2ZGk/7JRxOd7rCtKk4bYFUV8Q436mqo20nfSQ0tXFNQQwxrigY5IeKYBZNiYujqoGrjl8TzTEN9riEURsGwBiEUNIBSvqXl6L+gGQJ2OmHQK5NgOncM1VAPIVQE1DeDIQHzpCEpDpCFuVw29hu9+UpTnFcE6wAcnExqNjWR/eJjklpbY73ZnJ4mpqijxQrZQmpGVEine2kq+j46SQjZL7qp4ekqOV1bKFkDnNABUMRgxLAJutrWZwJMTYqdCLicK+RgXSgsAPYt3//C5vZ0cTk+Tq8tLIax4dmb5+WRSeM4jvCJDKxJvH68KhTLQVT5/O7zLy9bzydqacJuisvyKF+Yu3uD87q4FKCk7N2f5F6kUOZyZuX43Py8Ex2S5k5fNfbzB2dlZC1YKdzoctpLr3DDYc0k/gkFxVQPoLf9igF7e4NTAAJvwaHGRnEWjzM+Mj5PT9XUztKur5NvIiAXeHxqyA78tA0cV5TVvcCIQsPYuHQqZ4MlJcjA1ZS5oYYGk+vst8Ne+PrtiEnCUXGxf6utJ8fyc/NzcJF96etjkFJoaHLR8Citpp7vbXXJ99PsfaQBpbtFobiZGUxMrDPGWFmI0NJC4z2f6Xi+JeTzMp2ZTvTLCO5uWNkf1lybdn8ymZ/hXOk0u9vZYosW8XlGYg1wo22dZlnWAghNwwu8nx5EIq1Q3z7QAWqh4Rbr5amaqShIdHSybMxMTonHvpEqK1dY+0QASruD2lqSdjORE9PKml/hfbQRK2gB4oSNu3RdKmwnX0FvdCEDITbPHkhMgSLdMqlZRM9vHeNfmjXOapmNcN3hORIsMrT70lik19NQ3ABroO0eTSP+qfgOkcyL5e5Vx/gAAAABJRU5ErkJggg==" alt="riot-games">
+                </button>
+            </form>
+            <div hidden id="recentSearchContainer" class="recent-search-container">
+                <div class="title">
+                    최근 검색
+                </div>
+            </div>
+        </div>
     </div>
     <div class="menu-container">
         <ul>
@@ -45,36 +62,7 @@
     </div>
 </header>
 
-<main>
-    <div hidden id="error">
-        <h1 id="statusCode"></h1>
-        <p id="errorMessage"></p>
-        <button id="homeBtn">Home</button>
-    </div>
-
-    <div hidden id="summoner">
-        <div class="summoner-profile-container">
-            <div class="summoner-profile">
-                <div class="profile-icon">
-                    <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/profileicon/685.png" alt="">
-                    <div class="summoner-level">25</div>
-                </div>
-                <div class="profile-info">
-                    <p id="summonerName" th:text="${summonerName}"></p>
-                </div>
-            </div>
-        </div>
-
-        <div class="content-container">
-            <div class="content-left"></div>
-            <div class="content-right">
-                <button disabled id="loadMoreMatchesBtn">
-                    <img class="loading" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB2ElEQVR4nO2VPWtUQRSGR1ER/IDgF8RGRBMLLUX8+AkpLUxAQcTGQiwsAvkDNloIYqWCiEgqSVCwiZYiKbe/ubvnPe+ZvQv6A9SR2Sx6dze613vdK2IemGo+njNzzsw4t8kmG0DypKkkJERVT7u6IHHPiNBtikdjkYQQtg2LZYYqn6ny1Qyz+b5Os3lYVW6QrTOlpaZ4EgUG3BrqMzvaFpnqD4i74vHHk6DKFw9cKCWm4tP6kcq7QoFa89T3FEQ5MV9KbIY5Uyx7L+eKjA9hdbsp3vekH0Vk2tVFo9HYYSZnRWSf+y9JkmRn4cHtdut4zFcVYax6U2nEK0eVlzEFv5xA4tp6ccjTSmLF43yFe9XLIyLFbDdK4mEVcQy8/2rJ1ZGTVPVACGFrFTGAE0ZZ6z2rb38r11WJwZM8WJvwr+C1dYWUZ17l9shK/hnx0ffA+RDCFlcAA67nC8pU7heZN4SpLMQFBj/7NE0nSLmk2rrovd/9YzyW+sSU1JWB5BESN/N/svfNY1RobldJlqWTvUDvDIhflxJvBFWe9y/ebQ9iX5Zle0zxovudKlZi4O5PYZQPg2JS3rhxQ+Lu0I5VFsYu7nQ6e414lRMv1voqmdkhAPtrE7p/nW8ue+PYdWbC1wAAAABJRU5ErkJggg==" alt="spinner-frame-5">
-                </button>
-            </div>
-        </div>
-    </div>
-</main>
+<main id="main"></main>
 
 <footer></footer>
 
