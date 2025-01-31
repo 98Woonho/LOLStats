@@ -44,9 +44,6 @@
 </header>
 
 <main>
-    <div class="background-img-container">
-        <img th:src="@{/images/god.png}" alt="">
-    </div>
     <div class="search-container">
         <form action="/summoners" method="GET">
             <input id="summonerName" name="summonerName" type="text" placeholder="플레이어 이름 (예 : player#KR1)"
@@ -60,6 +57,7 @@
             <div class="title">
                 최근 검색
             </div>
+            <ul></ul>
         </div>
     </div>
 </main>

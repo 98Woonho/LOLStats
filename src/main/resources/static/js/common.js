@@ -6,18 +6,17 @@ summonerName.addEventListener('click', () => recentSearchContainer.hidden = fals
 
 // 그 외 요소 클릭 시, 최근 검색 창 숨기기
 document.addEventListener('click', (event) => {
-    if (!summonerName.contains(event.target) && !recentSearchContainer.contains( event.target) && !event.target.classList.contains('x')) {
+    if (!summonerName.contains(event.target) && !recentSearchContainer.contains(event.target) && !event.target.classList.contains('x')) {
         recentSearchContainer.hidden = true;
     }
 });
 
-// 최근 검색 컨테이너에 최근 검색어 리스트가 담긴 ul 넣기
-const ul = document.createElement('ul');
-const recentSearches = JSON.parse(localStorage.getItem('recentSearches')) || [];
+// 최근 검색 컨테이너에 최근 검색어 추가
+const recentSearches = JSON.parse(localStorage.getItem('recentSearches')) || []; // 로컬 스토리지에 recentSearches가 있으면 가져오고, 없으면 빈 배열
+const ul = recentSearchContainer.querySelector('ul'); // 최근 검색어를 담을 ul
 
 for (const recentSearch of recentSearches) {
-    const gameName = recentSearch.split('#')[0];
-    const tagLine = recentSearch.split('#')[1];
+    const [gameName, tagLine] =  recentSearch.split('#');
 
     const li = new DOMParser().parseFromString(`
         <li>
