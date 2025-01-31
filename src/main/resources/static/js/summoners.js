@@ -10,6 +10,8 @@ const loadingContainer = new DOMParser().parseFromString(`
     </div>
 `, 'text/html').getElementById('loadingContainer');
 
+main.appendChild(loadingContainer); // 로딩창 띄움
+
 // 즉시 실행 함수
 (async function () {
     try {
@@ -36,11 +38,12 @@ const loadingContainer = new DOMParser().parseFromString(`
 
         const puuid = response.data.puuid;
 
-        saveRecentSearch(summonerName); // 로컬 스토리지의 recentSearches에 소환사 이름 저장
+        const recentSearches = JSON.parse(localStorage.getItem('recentSearches'));
+        const hasSummonerName = recentSearches.includes(summonerName);
+
+        if (!hasSummonerName) saveRecentSearch(summonerName); // 로컬 스토리지의 recentSearches에 해당 소환사 이름이 없으면 소환사 이름 저장
 
         try {
-            main.appendChild(loadingContainer);
-
             const response = await axios.get(`/lol/summoner?puuid=${puuid}`);
             const profileIconId = response.data.profileIconId;
             const summonerLevel = response.data.summonerLevel;
@@ -130,6 +133,7 @@ const loadingContainer = new DOMParser().parseFromString(`
         const homeBtn = error.querySelector('.home-btn');
         homeBtn.addEventListener('click', () => location.href = '/');
 
+        main.replaceChildren();
         main.appendChild(error);
     }
 })();
@@ -715,7 +719,7 @@ async function getSubRuneUrl(subRuneStyleId) {
     return 'https://ddragon.leagueoflegends.com/cdn/img/' + subRuneInfo.icon; // 서브 룬 이미지 경로 return
 }
 
-// 검색한 소환사 이름을 최근 검색 로컬 스토리지에 저장하는 함수
+// 검색한 소환사 이름을 최근 검색 로컬 스토리지에 저장 & 최근 검색어 목록에 추가하는 함수
 function saveRecentSearch(summonerName) {
     const max = 10;
     let recentSearches = JSON.parse(localStorage.getItem('recentSearches')) || [];
@@ -728,4 +732,21 @@ function saveRecentSearch(summonerName) {
     }
 
     localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+
+
+    // 최근 검색어를 담고 있는 ul에 추가
+    const ul = document.getElementById('recentSearchContainer').querySelector('ul');
+
+    const [gameName, tagLine] = summonerName.split('#');
+
+    const li = new DOMParser().parseFromString(`
+        <li>
+            <a href="/summoners?summonerName=${encodeURIComponent(summonerName)}">${gameName}<span class="tag-line">#${tagLine}</span></a>
+            <button type="button" class="delete-recent-search-btn">
+                <img class="x" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA5ElEQVR4nO2UTU4CQRCF5wZMOAEcUdh5LILar97r1BZJ9CoaWSBuIAOZYIZhbGjckHlJb7oq+fLqryh69aol2WMUPiUEdy+LDrl7KRqi7DsSD0WqRHxE2fbwsDwHcveyite5ItbJkEibHSHtIG8A9o9myRCSA9EWDdB7CGFYxyPttQF4q+PZIADjmwC6SiLi569SXqx2R5bv4NTRyyjKNg3Ipvq/CaC1yTodhgwH/9wTnhlTAOOu8c4GhF97kg2KtOdrNl7EUzJExOq622Vf6RDZtDqSEuZJV1iYV/kkJsmQXvevHUgt1YwHOHhtAAAAAElFTkSuQmCC" alt="multiply">
+            </button>
+        </li>
+    `, 'text/html').querySelector('li');
+
+    ul.prepend(li); // ul의 첫 번째 자식으로 추가
 }

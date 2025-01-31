@@ -2,12 +2,23 @@ main {
     position: relative;
 }
 
-.background-img-container {
-    text-align: center;
+main::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../images/god.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.1;
+    z-index: -1;
 }
 
-.background-img-container img {
-    opacity: 0.1;
+.search-container {
+    top: 60%;
 }
 
 .search-container form {
@@ -23,28 +34,6 @@ main {
 }
 
 .search-container form input {
-    width: 200px;
-    flex: 1;
     background-color: #4E4E57;
     color: #FFF;
-    border: none;
-    border-radius: 0.5rem;
-    padding: 0 15px;
-}
-
-.search-container form input::placeholder {
-    color: #BDBCBA;
-}
-
-.search-container form input:focus {
-    border: none;
-    outline: none;
-}
-
-.search-container button {
-    background-color: unset;
-    border: none;
-    padding: 0;
-    line-height: 0;
-    cursor: pointer;
 }
