@@ -1,3 +1,7 @@
+.queue-type-container {
+
+}
+
 .loading-container {
     position: relative;
     width: inherit;
@@ -164,6 +168,10 @@ main .content-container .content-right {
     background-color: #59343B;
 }
 
+.match.again .match-summary {
+    background-color: #282830;
+}
+
 .infos {
     display: flex;
     flex-direction: row;
@@ -300,17 +308,22 @@ main .content-container .content-right {
     background-color: #855858;
 }
 
+.match.again .items img {
+    background-color: #42424F;
+}
+
 .stat-info {
     display: flex;
     flex-direction: row;
     gap: 10px;
 }
 
-.stat-info div {
+.stat-info > div {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     min-width: 70px;
+    gap: 3px;
 }
 
 .stat-info .label {
@@ -344,6 +357,10 @@ main .content-container .content-right {
 
 .match.lose .match-detail-btn {
     background-color: #703C47;
+}
+
+.match.again .match-detail-btn {
+    background-color: #42424F;
 }
 
 .match-detail {
@@ -493,6 +510,10 @@ table.win tbody {
 
 table.lose tbody {
     background-color: #59343B;
+}
+
+table.again tbody {
+    background-color: #282830;
 }
 
 .match.win table tbody tr.me {

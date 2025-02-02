@@ -38,10 +38,7 @@ main.appendChild(loadingContainer); // 로딩창 띄움
 
         const puuid = response.data.puuid;
 
-        const recentSearches = JSON.parse(localStorage.getItem('recentSearches'));
-        const hasSummonerName = recentSearches.includes(summonerName);
-
-        if (!hasSummonerName) saveRecentSearch(summonerName); // 로컬 스토리지의 recentSearches에 해당 소환사 이름이 없으면 소환사 이름 저장
+        saveRecentSearch(summonerName); // 로컬 스토리지의 recentSearches에 소환사 이름 저장
 
         try {
             const response = await axios.get(`/lol/summoner?puuid=${puuid}`);
@@ -154,6 +151,7 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
         for (const matchId of matchList) {
             try {
                 const response = await axios.get('/lol/match?matchId=' + matchId);
+                console.log(response);
 
                 const info = response.data.info;
 
@@ -200,6 +198,7 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                 const queueTypes = {
                     400: '일반',
                     430: '일반',
+                    490: '일반',
                     420: '개인/2인 랭크 게임',
                     440: '자유 랭크 게임',
                     450: '무작위 총력전',
@@ -303,10 +302,18 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                 const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
                 const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
 
+                // kda avg
+                let myKdaAvg = ((myInfo.kills + myInfo.assists) / myInfo.deaths).toFixed(2);
+                if (!isFinite(myKdaAvg)) {
+                    myKdaAvg = 'Perfect';
+                } else if (isNaN(myKdaAvg)) {
+                    myKdaAvg = 0;
+                }
+
                 // HTML 생성
                 const match = new DOMParser().parseFromString(
                     `
-                            <div class="match ${isWin ? "win" : "lose"}">
+                            <div class="match ${gameDuration <= 180 ? "again" : isWin ? "win" : "lose"}">
                                 <div class="match-summary">
                                     <div class="infos">
                                         <div class="game-info">
@@ -316,7 +323,7 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                                             </div>
                                             <div class="line"></div>
                                             <div>
-                                                <p class="result">${isWin ? '승리' : '패배'}</p>
+                                                <p class="result">${gameDuration <= 180 ? "다시하기" : isWin ? '승리' : '패배'}</p>
                                                 <p class="game-duration-time">${gameDurationHours === 0 ? '' : gameDurationHours + '시간 '}${gameDurationMinutes === 0 ? '' : gameDurationMinutes + '분 '}${gameDurationSeconds === 0 ? '' : gameDurationSeconds + '초'}</p>
                                             </div>
                                         </div>
@@ -360,7 +367,7 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                                             </div>
                                             <div>
                                                 <p class="label">KA / D</p>
-                                                <p class="kda-avg value">${Math.round(((myInfo.kills + myInfo.assists) / myInfo.deaths) * 100) / 100}</p>
+                                                <p class="kda-avg value">${myKdaAvg}</p>
                                             </div>
                                             <div>
                                                 <p class="label">CS</p>
@@ -369,11 +376,11 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                                         </div>
                                     </div>
                                     <button class="match-detail-btn">
-                                        <img src="${isWin ? "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAgUlEQVR4nGNgGAUM9fX/mTwb7+/2aLxnT2xwgNR6NdzfA9LLAAJeDQ+mezXc/0KMIVDNX0B6EKL//zN6NjyY6tl4/6tn/QMnnJrrH9p4Nd7/7Nl4fw7cdmINwa+ZgCHEacZhCGmaUQy5PxMSWPe/gNggMQaSwH+wId0gTLpmhhEFAAbtdmICvXslAAAAAElFTkSuQmCC" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAf0lEQVR4nO2QQQqDUAxEp72UM1AoeD3XRQRvUg+SeA11/UsUxI3t/+s6kE3Ie4EBriABd5PeI/nMrSNunRyCRcSk1qU5R7LC0hzMvkzAzcmXSYtJ9RlsVfVwcnKp37/nSr7CvyRZ8JmkCD5KjOyirLUwsosdSpI2SRNTDOO/8gHlO1mTtYIXXgAAAABJRU5ErkJggg=="}" alt="expand-arrow--v1">
+                                        <img src="${gameDuration <= 180 ? "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAfElEQVR4nO2QTQrCYAxE83mATCa9TkHo9boWKXgTeyvtXqbQ0oU/X93qg2zCvAnE7I84BHiNiKNVomw4R7kmgDzDea8pUUZZOdt9AfIE5wQ03SuZZAvnLZyX9XptySf5bUmt/LRkr7xQAjnMz9JzkYN2tpMSnr3mG9l+iAfDSx+fyNJJ1AAAAABJRU5ErkJggg==" : isWin ? "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAgUlEQVR4nGNgGAUM9fX/mTwb7+/2aLxnT2xwgNR6NdzfA9LLAAJeDQ+mezXc/0KMIVDNX0B6EKL//zN6NjyY6tl4/6tn/QMnnJrrH9p4Nd7/7Nl4fw7cdmINwa+ZgCHEacZhCGmaUQy5PxMSWPe/gNggMQaSwH+wId0gTLpmhhEFAAbtdmICvXslAAAAAElFTkSuQmCC" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAf0lEQVR4nO2QQQqDUAxEp72UM1AoeD3XRQRvUg+SeA11/UsUxI3t/+s6kE3Ie4EBriABd5PeI/nMrSNunRyCRcSk1qU5R7LC0hzMvkzAzcmXSYtJ9RlsVfVwcnKp37/nSr7CvyRZ8JmkCD5KjOyirLUwsosdSpI2SRNTDOO/8gHlO1mTtYIXXgAAAABJRU5ErkJggg=="}" alt="expand-arrow--v1">
                                     </button>
                                 </div>
                                 <div class="match-detail">
-                                    <table class="${isWin ? "win" : "lose"}">
+                                    <table class="${gameDuration <= 180 ? "again" : isWin ? "win" : "lose"}">
                                         <colgroup>
                                             <col width="90">
                                             <col width="90">
@@ -385,7 +392,7 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                                         </colgroup>
                                         <thead>
                                             <tr>
-                                                <th colspan="2"><span class="result">${isWin ? "승리" : "패배"}</span> ${myTeamId === 100 ? "(블루팀)" : "(레드팀)"}</th>
+                                                <th colspan="2"><span class="result">${gameDuration <= 180 ? "" : isWin ? "승리" : "패배"}</span> ${myTeamId === 100 ? "(블루팀)" : "(레드팀)"}</th>
                                                 <th>KDA</th>
                                                 <th>피해량</th>
                                                 <th>와드</th>
@@ -395,8 +402,8 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                                         </thead>
                                         <tbody></tbody>
                                     </table>
-                                    <div class="summary">
-                                        <div class="objectives ${isWin ? "win" : "lose"}">
+                                    ${gameDuration <= 180 ? '' : `<div class="summary">
+                                        <div class="objectives ${gameDuration <= 180 ? "again" : isWin ? "win" : "lose"}">
                                             <div>
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
                                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 4L10 0L16 4L14 8L11 16L10 15H6L5 16L2 8L0 4L6 0L4 4L5 5H7L8 4L9 5H11L12 4ZM7 8C7 7.44695 7.4481 7 8 7C8.55284 7 9 7.44695 9 8C9 8.55211 8.55284 9 8 9C7.4481 9 7 8.55211 7 8ZM9 10C9 9.4481 9.44716 9 10 9C10.5528 9 11 9.4481 11 10C11 10.5519 10.5528 11 10 11C9.44716 11 9 10.5519 9 10ZM8 11C7.4481 11 7 11.4479 7 12C7 12.5531 7.4481 13 8 13C8.55284 13 9 12.5531 9 12C9 11.4479 8.55284 11 8 11ZM5 10C5 9.4481 5.44789 9 6 9C6.55211 9 7 9.4481 7 10C7 10.5519 6.55211 11 6 11C5.44789 11 5 10.5519 5 10Z" fill="rgb(232, 64, 87)"></path>
@@ -455,7 +462,7 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                                                 <div style="width: ${100 - Math.round((myTeamTotalGold * 100 / (myTeamTotalGold + enemyTeamTotalGold)) * 100) / 100}%; height: 100%; background-color: #5383E8"></div>
                                             </div>
                                         </div>
-                                        <div class="objectives ${!isWin ? "win" : "lose"}">
+                                        <div class="objectives ${gameDuration <= 180 ? "again" : !isWin ? "win" : "lose"}">
                                             <div>
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
                                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 4L10 0L16 4L14 8L11 16L10 15H6L5 16L2 8L0 4L6 0L4 4L5 5H7L8 4L9 5H11L12 4ZM7 8C7 7.44695 7.4481 7 8 7C8.55284 7 9 7.44695 9 8C9 8.55211 8.55284 9 8 9C7.4481 9 7 8.55211 7 8ZM9 10C9 9.4481 9.44716 9 10 9C10.5528 9 11 9.4481 11 10C11 10.5519 10.5528 11 10 11C9.44716 11 9 10.5519 9 10ZM8 11C7.4481 11 7 11.4479 7 12C7 12.5531 7.4481 13 8 13C8.55284 13 9 12.5531 9 12C9 11.4479 8.55284 11 8 11ZM5 10C5 9.4481 5.44789 9 6 9C6.55211 9 7 9.4481 7 10C7 10.5519 6.55211 11 6 11C5.44789 11 5 10.5519 5 10Z" fill="rgb(232, 64, 87)"></path>
@@ -494,8 +501,9 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                                                 <p>${enemyTeamObjectives.inhibitor.kills}</p>
                                             </div>
                                         </div>
-                                    </div>
-                                    <table class="${!isWin ? "win" : "lose"}">
+                                    </div>`}
+                                    
+                                    <table class="${gameDuration <= 180 ? "again" : !isWin ? "win" : "lose"}">
                                         <colgroup>
                                             <col width="90">
                                             <col width="90">
@@ -507,7 +515,7 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                                         </colgroup>
                                         <thead>
                                             <tr>
-                                                <th colspan="2"><span class="result">${!isWin ? "승리" : "패배"}</span> ${myTeamId !== 100 ? "(블루팀)" : "(레드팀)"}</th>
+                                                <th colspan="2"><span class="result">${gameDuration <= 180 ? "" : !isWin ? "승리" : "패배"}</span> ${myTeamId !== 100 ? "(블루팀)" : "(레드팀)"}</th>
                                                 <th>KDA</th>
                                                 <th>피해량</th>
                                                 <th>와드</th>
@@ -553,6 +561,15 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                         const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
                         const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
 
+                        // kdaAvg
+                        let kdaAvg = ((participant.kills + participant.assists) / participant.deaths).toFixed(2);
+
+                        if (!isFinite(kdaAvg)) {
+                            kdaAvg = 'Perfect';
+                        } else if (isNaN(kdaAvg)) {
+                            kdaAvg = 0;
+                        }
+
                         const html = `
                                 <tr class="${participant.championName === myInfo.championName ? "me" : ""}">
                                 <td>
@@ -588,7 +605,7 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                                 <td>
                                     <div>
                                         <p>${participant.kills}/${participant.deaths}/${participant.assists}</p>
-                                        <p>${Math.round(((myInfo.kills + myInfo.assists) / myInfo.deaths) * 100) / 100}:1</p>
+                                        <p>${kdaAvg}${kdaAvg === 'Perfect' ? "" : ":1"}</p>
                                     </div>
                                 </td>
                                 <td>
@@ -733,9 +750,15 @@ function saveRecentSearch(summonerName) {
 
     localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
 
-
     // 최근 검색어를 담고 있는 ul에 추가
-    const ul = document.getElementById('recentSearchContainer').querySelector('ul');
+    const ul = document.getElementById('recentSearchContainer').querySelector('ul'); // ul
+
+    // 최근 검색어 목록에서 이미 존재하는 소환사 이름의 li를 제거하기 위해, 모든 li 요소를 순회하며 현재 검색한 소환사 이름인 li 찾기
+    ul.querySelectorAll("li").forEach(li => {
+        if (li.textContent.trim() === summonerName) {
+            li.remove(); // 해당 li 요소 제거
+        }
+    });
 
     const [gameName, tagLine] = summonerName.split('#');
 
