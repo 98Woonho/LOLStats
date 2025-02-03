@@ -6,17 +6,22 @@ let start = 0;
 const loadingContainer = new DOMParser().parseFromString(`
     <div id="loadingContainer" class="loading-container">
         <img class="icon" src="data:image/svg+xml; charset=utf-8;utf8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgaWQ9IkxlYWd1ZU9mTGVnZW5kcyI+CiAgPHBhdGggZD0iTTM1LDM3LjEzQTE0LjM4LDE0LjM4LDAsMCwwLDI0LDEzLjQ2YTExLjUxLDExLjUxLDAsMCwwLTEuNDUuMVYxMC42OEgxMS44N2wyLjkyLDMuNTh2Mi41NmExNC4yOSwxNC4yOSwwLDAsMC0uMTgsMjJsLTMuMTIsMy41SDM0bDQuNjQtNS4xNlpNMjQsMTQuNjRBMTMuMjEsMTMuMjEsMCwwLDEsMzMuNCwzNy4xM0gzMS45NGExMi4yMSwxMi4yMSwwLDAsMC04LTIxLjQ5LDExLjY2LDExLjY2LDAsMCwwLTEuNDYuMTF2LTFBMTMuOTQsMTMuOTQsMCwwLDEsMjQsMTQuNjRabS0xLjQ3LDEuN0ExMS44MiwxMS44MiwwLDAsMSwyNCwxNi4yM2ExMS42MiwxMS42MiwwLDAsMSw3LDIwLjlIMjIuNDJaTTE0Ljg1LDM1LjA3YTExLjUzLDExLjUzLDAsMCwxLDAtMTQuMzRabS00LjExLTcuMTlhMTMuMTUsMTMuMTUsMCwwLDEsNC4wNi05LjQ5djEuNDJhMTIuMTQsMTIuMTQsMCwwLDAsMCwxNi4xOHYxLjQzQTEzLjE3LDEzLjE3LDAsMCwxLDEwLjc0LDI3Ljg4Wk0zMy41LDQxLjExSDE0LjEzTDE2LDM5LDE2LDEzLjg0bC0xLjYyLTJoN2wtLjEyLDI2LjQ1SDM2WiIgZmlsbD0iI2ZmZjlmOSIgY2xhc3M9ImNvbG9yMDAwMDAwIHN2Z1NoYXBlIj48L3BhdGg+Cjwvc3ZnPgo=" alt="">
-        <div class="dark-box"></div>
     </div>
 `, 'text/html').getElementById('loadingContainer');
-
-main.appendChild(loadingContainer); // 로딩창 띄움
 
 // 즉시 실행 함수
 (async function () {
     try {
         const urlParams = new URLSearchParams(window.location.search); // 현재 URL에서 쿼리 파라미터를 가져오기
         const summonerName = urlParams.get('summonerName'); // summonerName 파라미터 값 가져오기
+        const queueType = urlParams.get('queueType');
+
+        // 이전 페이지의 summonerName과 현재 페이지의 summonerName이 다르면 loadingContainer 창 띄우기
+        const lastSummonerName = sessionStorage.getItem('lastSummonerName') || '';
+
+        if (lastSummonerName !== summonerName) {
+            main.appendChild(loadingContainer);
+        }
 
         // summonerName 파라미터 값에 #가 포함되어 있는지 검사
         if (!summonerName.includes('#')) {
@@ -45,38 +50,67 @@ main.appendChild(loadingContainer); // 로딩창 띄움
             const profileIconId = response.data.profileIconId;
             const summonerLevel = response.data.summonerLevel;
 
-            const summoner = new DOMParser().parseFromString(`
-                <div id="summoner">
-                    <div class="summoner-profile-container">
-                        <div class="summoner-profile">
-                            <div class="profile-icon">
-                                <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/profileicon/${profileIconId}.png" alt="">
-                                <div class="summoner-level">${summonerLevel}</div>
-                            </div>
-                            <div class="profile-info">
-                                <p class="summoner-name">${summonerName}</p>
-                                <button class="renew-record-btn">전적 갱신</button>
-                            </div>
+            const summonerProfileContainer = new DOMParser().parseFromString(`
+                <div class="summoner-profile-container">
+                    <div class="summoner-profile">
+                        <div class="profile-icon">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/profileicon/${profileIconId}.png" alt="">
+                            <div class="summoner-level">${summonerLevel}</div>
                         </div>
-                    </div>
-            
-                    <div class="content-container" id="contentContainer">
-                        <div class="content-left"></div>
-                        <div class="content-right">
-                            <button class="load-more-matches-btn">Load More</button>
+                        <div class="profile-info">
+                            <p class="summoner-name">${summonerName}</p>
+                            <button class="renew-record-btn">전적 갱신</button>
                         </div>
-                    </div>
+                    </div> 
                 </div>
-            `, 'text/html').getElementById('summoner');
+                `, 'text/html').querySelector('.summoner-profile-container');
 
-            const loadMoreMatchesBtn = summoner.querySelector('.load-more-matches-btn');
-            const renewRecordBtn = summoner.querySelector('.renew-record-btn');
-            const contentRight = summoner.querySelector('.content-right');
+            const renewRecordBtn = summonerProfileContainer.querySelector('.renew-record-btn');
 
             // renewRecordBtn click event
-            renewRecordBtn.addEventListener('click', function() {
+            renewRecordBtn.addEventListener('click', function () {
                 localStorage.setItem('renewRecordTime', JSON.stringify(new Date()));
             });
+
+            if (lastSummonerName === summonerName) {
+                main.appendChild(summonerProfileContainer);
+                main.appendChild(loadingContainer);
+            }
+
+            const summonerKey = `summonerData_${queueType === null ? 'ALL' : queueType}_${summonerName}`; // 저장될 데이터의 키 (소환사 이름을 기반으로 저장)
+            const summonerData = localStorage.getItem(summonerKey); // 로컬 저장소에서 소환사 데이터 가져오기
+
+            const contentContainerHtml = summonerData || `
+            <div class="content-container">
+                <ul class="queue-type-container">
+                    <li>
+                        <a href="/summoners?summonerName=${encodedSummonerName}&queueType=ALL">전체</a>
+                    </li>   
+                    <li>
+                        <a href="/summoners?summonerName=${encodedSummonerName}&queueType=SOLORANK">개인/2인 랭크 게임</a>
+                    </li>
+                    <li>
+                        <a href="/summoners?summonerName=${encodedSummonerName}&queueType=FREERANK">자유 랭크 게임</a>
+                    </li>
+                    <li>
+                        <a href="/summoners?summonerName=${encodedSummonerName}&queueType=NORMAL">일반</a>
+                    </li>
+                    <li>
+                        <a href="/summoners?summonerName=${encodedSummonerName}&queueType=ARAM">무작위 총력전</a>
+                    </li>
+                </ul>
+                <div class="stats-container" id="statsContainer">
+                    <div class="content-left"></div>
+                    <div class="content-right">
+                        <button class="load-more-matches-btn">Load More</button>
+                    </div>
+                </div>
+            </div>`;
+
+            const contentContainer = new DOMParser().parseFromString(contentContainerHtml, 'text/html').querySelector('.content-container');
+
+            const loadMoreMatchesBtn = contentContainer.querySelector('.load-more-matches-btn');
+            const contentRight = contentContainer.querySelector('.content-right');
 
             // loadMoreMatchesBtn click event
             loadMoreMatchesBtn.addEventListener('click', async function () {
@@ -88,13 +122,22 @@ main.appendChild(loadingContainer); // 로딩창 띄움
                 await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn);
             });
 
-            await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn);
-            main.replaceChildren();
-            main.appendChild(summoner);
+            if (summonerData === null) await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn);
+
+            localStorage.setItem(summonerKey, contentContainer.outerHTML);
+            sessionStorage.setItem('lastSummonerName', summonerName);
+            main.removeChild(loadingContainer);
+
+            if (lastSummonerName !== summonerName) {
+                main.appendChild(summonerProfileContainer);
+            }
+
+            main.appendChild(contentContainer);
         } catch (err) {
             console.error(err);
             alert('정보를 불러오는데 오류가 발생하였습니다. 잠시 후 다시 시도해주세요');
         }
+
     } catch (err) {
         let errorMessage;
         const status = err.response.status;
@@ -540,8 +583,8 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                 const tables = match.querySelectorAll('.match-detail > table');
 
                 const tbodies = [
-                    {tbody : tables[0].querySelector('tbody'), participants : myTeamParticipants},
-                    {tbody : tables[1].querySelector('tbody'), participants : enemyTeamParticipants},
+                    {tbody: tables[0].querySelector('tbody'), participants: myTeamParticipants},
+                    {tbody: tables[1].querySelector('tbody'), participants: enemyTeamParticipants},
                 ];
 
                 // 상세 정보 테이블의 tbody에 참가자 정보 넣기
