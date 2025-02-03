@@ -1,7 +1,3 @@
-.queue-type-container {
-
-}
-
 .loading-container {
     position: relative;
     width: inherit;
@@ -14,14 +10,15 @@
 
 .loading-container .icon {
     width: 200px;
-}
+    display: block;
+    height: auto;
 
-.loading-container .dark-box {
-    position: absolute;
-    width: 300px;
-    height: 200px;
-    background: linear-gradient(to right, rgba(28, 28, 31, 0), rgba(28, 28, 31, 0.5) 50%, rgba(28, 28, 31, 0));
-    animation: darkFade 3s infinite ease;
+    mask-image: linear-gradient(90deg,
+    rgba(0, 0, 0, 1) 20%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 1) 80%);
+    mask-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
 }
 
 .error {
@@ -83,7 +80,7 @@
     width: 100%;
 }
 
-.summoner-profile .profile-icon .summoner-level {
+.summoner-profile .summoner-level {
     position: absolute;
     color: var(--font-primary);
     background-color: #1C1C1F;
@@ -101,13 +98,13 @@
     gap: 10px;
 }
 
-.summoner-profile .profile-info .summoner-name {
+.summoner-profile .summoner-name {
     color: var(--font-primary);
     font-size: 30px;
     font-weight: 500;
 }
 
-.summoner-profile .profile-info .renew-record-btn {
+.summoner-profile .renew-record-btn {
     width: 95px;
     height: 50px;
     border-radius: 5px;
@@ -118,25 +115,48 @@
     font-weight: 500;
 }
 
-.summoner-profile .profile-info .renew-record-btn:hover {
+.summoner-profile .renew-record-btn:hover {
     cursor: pointer;
     background-color: #0F73D6;
 }
 
-main .content-container {
+.content-container {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     width: 1080px;
     margin: 8px auto 0 auto;
     color: #9E9EB1;
+    gap: 8px;
 }
 
-main .content-container .content-left {
+.queue-type-container {
+    background-color: #3E3E45;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: row;
+    padding: 5px;
+}
+
+.queue-type-container li {
+    padding: 15px 40px;
+}
+
+.queue-type-container li:hover {
+    cursor: pointer;
+    background-color: #5C5C66;
+}
+
+.stats-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.content-left {
     width: 400px;
     height: 10px;
 }
 
-main .content-container .content-right {
+.content-right {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -603,11 +623,11 @@ table td:nth-child(4) .graph {
     }
 }
 
-@keyframes darkFade {
+@keyframes shimmer {
     0% {
-        transform: translateX(-100%);
+        mask-position: 100% 0;
     }
     100% {
-        transform: translateX(100%);
+        mask-position: -100% 0;
     }
 }
