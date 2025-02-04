@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.TimeoutException;
@@ -47,12 +48,19 @@ public class LolServiceImpl implements LolService {
     }
 
     @Override
-    public Mono<String> getMatchList(String puuid, int start, long startTime) {
+    public Mono<String> getMatchList(String puuid, int start, long startTime, int queue) {
         return webClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/lol/match/v5/matches/by-puuid/{puuid}/ids")
-                        .queryParam("startTime", startTime)
-                        .queryParam("start", start)
-                        .build(puuid))
+                .uri(uriBuilder -> {
+                    UriBuilder builder = uriBuilder.path("/lol/match/v5/matches/by-puuid/{puuid}/ids")
+                            .queryParam("startTime", startTime)
+                            .queryParam("start", start);
+
+                    if (queue != 0) {
+                        builder = builder.queryParam("queue", queue);
+                    }
+
+                    return builder.build(puuid);
+                })
                 .retrieve()
                 .bodyToMono(String.class)
                 .onErrorResume(WebClientResponseException.class, e -> Mono.error(new CustomException(HttpStatus.valueOf(e.getStatusCode().value()), e.getMessage()))
