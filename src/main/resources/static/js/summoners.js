@@ -1,28 +1,25 @@
 const version = '15.1.1';
 const main = document.getElementById('main');
+const urlParams = new URLSearchParams(window.location.search); // 현재 URL에서 쿼리 파라미터를 가져오기
+const summonerName = urlParams.get('summonerName'); // summonerName 파라미터 값 가져오기
+const queueType = urlParams.get('queueType') || 'ALL'; // queueType 파라미터 값 가져오기
+const lastSummonerName = sessionStorage.getItem('lastSummonerName') || ''; // sessionStorage에서 lastSummonerName 값 가져오기
 let start = 0;
 
-// loadingContainer DOM
 const loadingContainer = new DOMParser().parseFromString(`
     <div id="loadingContainer" class="loading-container">
         <img class="icon" src="data:image/svg+xml; charset=utf-8;utf8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgaWQ9IkxlYWd1ZU9mTGVnZW5kcyI+CiAgPHBhdGggZD0iTTM1LDM3LjEzQTE0LjM4LDE0LjM4LDAsMCwwLDI0LDEzLjQ2YTExLjUxLDExLjUxLDAsMCwwLTEuNDUuMVYxMC42OEgxMS44N2wyLjkyLDMuNTh2Mi41NmExNC4yOSwxNC4yOSwwLDAsMC0uMTgsMjJsLTMuMTIsMy41SDM0bDQuNjQtNS4xNlpNMjQsMTQuNjRBMTMuMjEsMTMuMjEsMCwwLDEsMzMuNCwzNy4xM0gzMS45NGExMi4yMSwxMi4yMSwwLDAsMC04LTIxLjQ5LDExLjY2LDExLjY2LDAsMCwwLTEuNDYuMTF2LTFBMTMuOTQsMTMuOTQsMCwwLDEsMjQsMTQuNjRabS0xLjQ3LDEuN0ExMS44MiwxMS44MiwwLDAsMSwyNCwxNi4yM2ExMS42MiwxMS42MiwwLDAsMSw3LDIwLjlIMjIuNDJaTTE0Ljg1LDM1LjA3YTExLjUzLDExLjUzLDAsMCwxLDAtMTQuMzRabS00LjExLTcuMTlhMTMuMTUsMTMuMTUsMCwwLDEsNC4wNi05LjQ5djEuNDJhMTIuMTQsMTIuMTQsMCwwLDAsMCwxNi4xOHYxLjQzQTEzLjE3LDEzLjE3LDAsMCwxLDEwLjc0LDI3Ljg4Wk0zMy41LDQxLjExSDE0LjEzTDE2LDM5LDE2LDEzLjg0bC0xLjYyLTJoN2wtLjEyLDI2LjQ1SDM2WiIgZmlsbD0iI2ZmZjlmOSIgY2xhc3M9ImNvbG9yMDAwMDAwIHN2Z1NoYXBlIj48L3BhdGg+Cjwvc3ZnPgo=" alt="">
     </div>
-`, 'text/html').getElementById('loadingContainer');
+`, 'text/html').getElementById('loadingContainer'); // loadingContainer DOM
+
+// sessionStorage의 lastSummonerName과 현재 페이지의 summonerName이 다르면 main 전체에 loadingContainer 창 띄우기
+if (lastSummonerName !== summonerName) {
+    main.appendChild(loadingContainer);
+}
 
 // 즉시 실행 함수
 (async function () {
     try {
-        const urlParams = new URLSearchParams(window.location.search); // 현재 URL에서 쿼리 파라미터를 가져오기
-        const summonerName = urlParams.get('summonerName'); // summonerName 파라미터 값 가져오기
-        const queueType = urlParams.get('queueType');
-
-        // 이전 페이지의 summonerName과 현재 페이지의 summonerName이 다르면 loadingContainer 창 띄우기
-        const lastSummonerName = sessionStorage.getItem('lastSummonerName') || '';
-
-        if (lastSummonerName !== summonerName) {
-            main.appendChild(loadingContainer);
-        }
-
         // summonerName 파라미터 값에 #가 포함되어 있는지 검사
         if (!summonerName.includes('#')) {
             // #가 포함되어 있지 안으면 404 throw
@@ -45,6 +42,32 @@ const loadingContainer = new DOMParser().parseFromString(`
 
         saveRecentSearch(summonerName); // 로컬 스토리지의 recentSearches에 소환사 이름 저장
 
+        // 갱신 시간 setting
+        if (!localStorage.getItem(`renewTime_${summonerName}`)) {
+            // localStorage에 renewTime이 없으면 현재 시각으로 set
+            localStorage.setItem(`renewTime_${summonerName}`, JSON.stringify(new Date().getTime()));
+        }
+
+        const renewTime = localStorage.getItem(`renewTime_${summonerName}`); // 갱신 시간
+        let renewTimeStamp = new Date().getTime() - renewTime; // 갱신 시간 스탬프
+
+        const days = Math.floor(renewTimeStamp / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((renewTimeStamp % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((renewTimeStamp % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((renewTimeStamp % (1000 * 60)) / 1000);
+
+        if (days !== 0) {
+            renewTimeStamp = `${days}일 전`;
+        } else if (hours !== 0) {
+            renewTimeStamp = `${hours}시간 전`;
+        } else if (minutes !== 0) {
+            renewTimeStamp = `${minutes}분 전`;
+        } else if (seconds !== 0) {
+            renewTimeStamp = `${seconds}초 전`;
+        } else {
+            renewTimeStamp = '방금 전';
+        }
+
         try {
             const response = await axios.get(`/lol/summoner?puuid=${puuid}`);
             const profileIconId = response.data.profileIconId;
@@ -60,6 +83,7 @@ const loadingContainer = new DOMParser().parseFromString(`
                         <div class="profile-info">
                             <p class="summoner-name">${summonerName}</p>
                             <button class="renew-record-btn">전적 갱신</button>
+                            <p class="renew-time">갱신 시간 : ${renewTimeStamp}</p>
                         </div>
                     </div> 
                 </div>
@@ -69,7 +93,18 @@ const loadingContainer = new DOMParser().parseFromString(`
 
             // renewRecordBtn click event
             renewRecordBtn.addEventListener('click', function () {
-                localStorage.setItem('renewRecordTime', JSON.stringify(new Date()));
+                localStorage.setItem(`renewTime_${summonerName}`, JSON.stringify(new Date().getTime()));
+
+                const prefix = `summonerData_${summonerName}_`;
+
+                for (let i = localStorage.length - 1; i >= 0; i--) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith(prefix)) {
+                        localStorage.removeItem(key);
+                    }
+                }
+
+                window.location.reload();
             });
 
             if (lastSummonerName === summonerName) {
@@ -77,8 +112,8 @@ const loadingContainer = new DOMParser().parseFromString(`
                 main.appendChild(loadingContainer);
             }
 
-            const summonerKey = `summonerData_${queueType === null ? 'ALL' : queueType}_${summonerName}`; // 저장될 데이터의 키 (소환사 이름을 기반으로 저장)
-            const summonerData = localStorage.getItem(summonerKey); // 로컬 저장소에서 소환사 데이터 가져오기
+            const summonerDataKey = `summonerData_${summonerName}_${queueType === null ? 'ALL' : queueType}`; // 저장될 데이터의 키 (소환사 이름을 기반으로 저장)
+            const summonerData = localStorage.getItem(summonerDataKey); // 로컬 저장소에서 소환사 데이터 가져오기
 
             const contentContainerHtml = summonerData || `
             <div class="content-container">
@@ -119,12 +154,23 @@ const loadingContainer = new DOMParser().parseFromString(`
 
                 loadMoreMatchesBtn.innerHTML = `<img class="loading" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB2ElEQVR4nO2VPWtUQRSGR1ER/IDgF8RGRBMLLUX8+AkpLUxAQcTGQiwsAvkDNloIYqWCiEgqSVCwiZYiKbe/ubvnPe+ZvQv6A9SR2Sx6dze613vdK2IemGo+njNzzsw4t8kmG0DypKkkJERVT7u6IHHPiNBtikdjkYQQtg2LZYYqn6ny1Qyz+b5Os3lYVW6QrTOlpaZ4EgUG3BrqMzvaFpnqD4i74vHHk6DKFw9cKCWm4tP6kcq7QoFa89T3FEQ5MV9KbIY5Uyx7L+eKjA9hdbsp3vekH0Vk2tVFo9HYYSZnRWSf+y9JkmRn4cHtdut4zFcVYax6U2nEK0eVlzEFv5xA4tp6ccjTSmLF43yFe9XLIyLFbDdK4mEVcQy8/2rJ1ZGTVPVACGFrFTGAE0ZZ6z2rb38r11WJwZM8WJvwr+C1dYWUZ17l9shK/hnx0ffA+RDCFlcAA67nC8pU7heZN4SpLMQFBj/7NE0nSLmk2rrovd/9YzyW+sSU1JWB5BESN/N/svfNY1RobldJlqWTvUDvDIhflxJvBFWe9y/ebQ9iX5Zle0zxovudKlZi4O5PYZQPg2JS3rhxQ+Lu0I5VFsYu7nQ6e414lRMv1voqmdkhAPtrE7p/nW8ue+PYdWbC1wAAAABJRU5ErkJggg==" alt="spinner-frame-5">`
 
-                await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn);
+                await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType);
             });
 
-            if (summonerData === null) await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn);
+            if (summonerData === null) {
+                await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType);
+            } else {
+                const matches = contentRight.querySelectorAll('.match');
+                matches.forEach(match => {
+                    const matchDetailBtn = match.querySelector('.match-detail-btn');
+                    const matchDetail = match.querySelector('.match-detail');
+                    matchDetailBtn.addEventListener('click', function () {
+                        matchDetail.classList.toggle('opened');
+                    })
+                })
+            }
 
-            localStorage.setItem(summonerKey, contentContainer.outerHTML);
+            localStorage.setItem(summonerDataKey, contentContainer.outerHTML);
             sessionStorage.setItem('lastSummonerName', summonerName);
             main.removeChild(loadingContainer);
 
@@ -179,13 +225,21 @@ const loadingContainer = new DOMParser().parseFromString(`
 })();
 
 // 매치들 정보 DOM을 추가하는 함수
-async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
-    const now = new Date(); // 현재 날짜
-    now.setMonth(now.getMonth() - 3); // 3개월 전 날짜
-    const startTime = Math.floor(now.getTime() / 1000); // 3개월 이전까지의 전적을 가져오기 위한 3개월 전의 Epoch Timestamp(초 단위)
+async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType) {
+    const renewTime = new Date(Number(localStorage.getItem(`renewTime_${summonerName}`))); // 갱신 시간
+    renewTime.setMonth(renewTime.getMonth() - 3); // 3개월 전 날짜
+    const startTime = Math.floor(renewTime.getTime() / 1000); // 3개월 이전까지의 전적을 가져오기 위한 3개월 전의 Epoch Timestamp(초 단위)
+
+    const queue = {
+        'ALL' : 0,
+        'SOLORANK' : 420,
+        'FREERANK' : 440,
+        'NORMAL' : 490,
+        'ARAM' : 450
+    };
 
     try {
-        const response = await axios.get(`/lol/matchList?puuid=${puuid}&start=${start}&startTime=${startTime}`);
+        const response = await axios.get(`/lol/matchList?puuid=${puuid}&start=${start}&startTime=${startTime}&queue=${queue[queueType]}`);
         const matchList = response.data;
 
         // 여러 매치 정보를 한 번에 보여주기 위한 fragment
@@ -194,8 +248,6 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
         for (const matchId of matchList) {
             try {
                 const response = await axios.get('/lol/match?matchId=' + matchId);
-                console.log(response);
-
                 const info = response.data.info;
 
                 // 타임 스탬프
@@ -226,11 +278,12 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                 const gameDurationSeconds = gameDuration % 60;
 
                 /** QueueId
-                 * 400, 430 : 일반 게임(소환사의 협곡)
+                 * 490 : 일반 게임(소환사의 협곡)
                  * 420 : 랭크 게임(솔로/듀오)
                  * 440 : 랭크 게임(자유랭크)
                  * 450 : 무작위 총력전(칼바람 나락)
-                 * 900, 1010 : URF 모드
+                 * 900 : URF
+                 * 1010 : 모두 무작위 URF
                  * 830 : AI 상대 게임(초급 봇)
                  * 840 : AI 상대 게임(중급 봇)
                  * 850 : AI 상대 게임(숙련 봇)
@@ -239,8 +292,6 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
 
                 // queueId에 따른 queueType
                 const queueTypes = {
-                    400: '일반',
-                    430: '일반',
                     490: '일반',
                     420: '개인/2인 랭크 게임',
                     440: '자유 랭크 게임',
@@ -573,10 +624,10 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
                         `, 'text/html');
 
                 // 매치 상세 정보 버튼 클릭 이벤트 추가
-                const detailInfoBtn = match.querySelector('.match-detail-btn');
+                const matchDetailBtn = match.querySelector('.match-detail-btn');
                 const matchDetail = match.querySelector('.match-detail');
 
-                detailInfoBtn.addEventListener('click', function () {
+                matchDetailBtn.addEventListener('click', function () {
                     matchDetail.classList.toggle('opened');
                 })
 
@@ -710,9 +761,14 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn) {
         }
 
         contentRight.insertBefore(matchesFragment, loadMoreMatchesBtn);
-        loadMoreMatchesBtn.replaceChildren();
-        loadMoreMatchesBtn.removeAttribute('disabled');
-        loadMoreMatchesBtn.innerText = 'Load More';
+
+        if (matchList.length < 20) {
+            loadMoreMatchesBtn.hidden = true;
+        } else {
+            loadMoreMatchesBtn.replaceChildren();
+            loadMoreMatchesBtn.removeAttribute('disabled');
+            loadMoreMatchesBtn.innerText = 'Load More';
+        }
 
         start += 20;
     } catch (err) {

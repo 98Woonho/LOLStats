@@ -98,13 +98,13 @@
     gap: 10px;
 }
 
-.summoner-profile .summoner-name {
+.profile-info .summoner-name {
     color: var(--font-primary);
     font-size: 30px;
     font-weight: 500;
 }
 
-.summoner-profile .renew-record-btn {
+.profile-info .renew-record-btn {
     width: 95px;
     height: 50px;
     border-radius: 5px;
@@ -115,9 +115,13 @@
     font-weight: 500;
 }
 
-.summoner-profile .renew-record-btn:hover {
+.profile-info .renew-record-btn:hover {
     cursor: pointer;
     background-color: #0F73D6;
+}
+
+.profile-info .renew-time {
+    color: #ADADAB;
 }
 
 .content-container {
@@ -137,12 +141,12 @@
     padding: 5px;
 }
 
-.queue-type-container li {
+.queue-type-container a {
+    display: inline-block;
     padding: 15px 40px;
 }
 
-.queue-type-container li:hover {
-    cursor: pointer;
+.queue-type-container a:hover {
     background-color: #5C5C66;
 }
 
@@ -590,9 +594,6 @@ table td:nth-child(4) .graph {
 }
 
 .load-more-matches-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     height: 35px;
     background-color: #333242;
     border-radius: 5px;

@@ -1,12 +1,12 @@
-const summonerName = document.getElementById('summonerName');
+const summonerNameInput = document.getElementById('summonerName');
 const recentSearchContainer = document.getElementById('recentSearchContainer');
 
 // 소환사 이름 검색 input 클릭 시, 최근 검색 창 보이기
-summonerName.addEventListener('click', () => recentSearchContainer.hidden = false);
+summonerNameInput.addEventListener('click', () => recentSearchContainer.hidden = false);
 
 // 그 외 요소 클릭 시, 최근 검색 창 숨기기
 document.addEventListener('click', (event) => {
-    if (!summonerName.contains(event.target) && !recentSearchContainer.contains(event.target) && !event.target.classList.contains('x')) {
+    if (!summonerNameInput.contains(event.target) && !recentSearchContainer.contains(event.target) && !event.target.classList.contains('x')) {
         recentSearchContainer.hidden = true;
     }
 });

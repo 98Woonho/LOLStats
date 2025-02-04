@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.beans.ConstructorProperties;
+
 @RestController
 @RequestMapping("/lol")
 @Slf4j
@@ -30,8 +32,9 @@ public class LolController {
     @GetMapping("/matchList")
     public Mono<ResponseEntity<String>> getMatchList(@RequestParam("puuid") String puuid,
                                                      @RequestParam("start") int start,
-                                                     @RequestParam("startTime") long startTime) {
-        return lolService.getMatchList(puuid, start, startTime)
+                                                     @RequestParam("startTime") long startTime,
+                                                     @RequestParam("queue") int queue) {
+        return lolService.getMatchList(puuid, start, startTime, queue)
                 .map(response -> ResponseEntity.ok(response))
                 .onErrorResume(CustomException.class, e -> Mono.just(ResponseEntity.status(e.getStatus()).body(e.getMessage())));
     }
