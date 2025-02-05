@@ -70,6 +70,7 @@ if (lastSummonerName !== summonerName) {
 
         try {
             const response = await axios.get(`/lol/summoner?puuid=${puuid}`);
+            console.log(response);
             const profileIconId = response.data.profileIconId;
             const summonerLevel = response.data.summonerLevel;
 
@@ -115,8 +116,8 @@ if (lastSummonerName !== summonerName) {
             const summonerDataKey = `summonerData_${summonerName}_${queueType === null ? 'ALL' : queueType}`; // 저장될 데이터의 키 (소환사 이름을 기반으로 저장)
             const summonerData = localStorage.getItem(summonerDataKey); // 로컬 저장소에서 소환사 데이터 가져오기
 
-            const contentContainerHtml = summonerData || `
-            <div class="content-container">
+            const statsContainerHtml = summonerData || `
+            <div class="stats-container">
                 <ul class="queue-type-container">
                     <li>
                         <a href="/summoners?summonerName=${encodedSummonerName}&queueType=ALL">전체</a>
@@ -134,28 +135,127 @@ if (lastSummonerName !== summonerName) {
                         <a href="/summoners?summonerName=${encodedSummonerName}&queueType=ARAM">무작위 총력전</a>
                     </li>
                 </ul>
-                <div class="stats-container" id="statsContainer">
-                    <div class="content-left"></div>
+                <div class="content-container" id="contentContainer">
+                    <div class="content-left">
+                        ${queueType === 'ALL' || queueType === 'SOLORANK' ? `
+                        <div class="rank-info">
+                            <div class="header">개인/2인 랭크 게임</div>
+                            <div class="content">
+                                <img src="/images/rank-emblems/challenger.png" alt=""/>
+                                <div class="tier-info">
+                                    <p class="tier">Challenger</p>
+                                    <p class="lp">1042 LP</p>
+                                </div>
+                                <div class="win-lose-info">
+                                    <p class="win-lose">15승 23패</p>
+                                    <p class="rate">38%</p>
+                                </div>
+                            </div>
+                        </div>` : ``}
+                        ${queueType === 'ALL' || queueType === 'FREERANK' ? `
+                        <div class="rank-info">
+                            <div class="header">자유 랭크 게임</div>
+                            <div class="content">
+                                <img src="/images/rank-emblems/challenger.png" alt=""/>
+                                <div class="tier-info">
+                                    <p class="tier">Challenger</p>
+                                    <p class="lp">1042 LP</p>
+                                </div>
+                                <div class="win-lose-info">
+                                    <p class="win-lose">15승 23패</p>
+                                    <p class="rate">38%</p>
+                                </div>
+                            </div>
+                        </div>` : ``}
+                    </div>
                     <div class="content-right">
                         <button class="load-more-matches-btn">Load More</button>
                     </div>
                 </div>
             </div>`;
 
-            const contentContainer = new DOMParser().parseFromString(contentContainerHtml, 'text/html').querySelector('.content-container');
+            const statsContainer = new DOMParser().parseFromString(statsContainerHtml, 'text/html').querySelector('.stats-container');
 
-            const loadMoreMatchesBtn = contentContainer.querySelector('.load-more-matches-btn');
-            const contentRight = contentContainer.querySelector('.content-right');
+            // const contentLeft = statsContainer.querySelector('.content-left');
+            //
+            // if (queueType === 'ALL' || queueType === null) {
+            //     contentLeft.innerHTML = `
+            //         <div class="rank-info">
+            //             <div class="header">개인/2인 랭크 게임</div>
+            //             <div class="content">
+            //                 <img src="/images/rank-emblems/challenger.png" alt="">
+            //                 <div class="tier-info">
+            //                     <p class="tier">Challenger</p>
+            //                     <p class="lp">1042 LP</p>
+            //                 </div>
+            //                 <div class="win-lose-info">
+            //                     <p class="win-lose">15승 23패</p>
+            //                     <p class="rate">38%</p>
+            //                 </div>
+            //             </div>
+            //         </div>
+            //         <div class="rank-info">
+            //             <div class="header">자유 랭크 게임</div>
+            //             <div class="content">
+            //                 <img src="/images/rank-emblems/challenger.png" alt="">
+            //                 <div class="tier-info">
+            //                     <p class="tier">Challenger</p>
+            //                     <p class="lp">1042 LP</p>
+            //                 </div>
+            //                 <div class="win-lose-info">
+            //                     <p class="win-lose">15승 23패</p>
+            //                     <p class="rate">38%</p>
+            //                 </div>
+            //             </div>
+            //         </div>`;
+            // } else if (queueType === 'SOLORANK') {
+            //     contentLeft.innerHTML = `
+            //         <div class="rank-info">
+            //             <div class="header">개인/2인 랭크 게임</div>
+            //             <div class="content">
+            //                 <img src="/images/rank-emblems/challenger.png" alt="">
+            //                 <div class="tier-info">
+            //                     <p class="tier">Challenger</p>
+            //                     <p class="lp">1042 LP</p>
+            //                 </div>
+            //                 <div class="win-lose-info">
+            //                     <p class="win-lose">15승 23패</p>
+            //                     <p class="rate">38%</p>
+            //                 </div>
+            //             </div>
+            //         </div>`;
+            // } else if (queueType === 'FREERANK') {
+            //     contentLeft.innerHTML = `
+            //         <div class="rank-info">
+            //             <div class="header">자유 랭크 게임</div>
+            //             <div class="content">
+            //                 <img src="/images/rank-emblems/challenger.png" alt="">
+            //                 <div class="tier-info">
+            //                     <p class="tier">Challenger</p>
+            //                     <p class="lp">1042 LP</p>
+            //                 </div>
+            //                 <div class="win-lose-info">
+            //                     <p class="win-lose">15승 23패</p>
+            //                     <p class="rate">38%</p>
+            //                 </div>
+            //             </div>
+            //         </div>`;
+            // }
+
+            const loadMoreMatchesBtn = statsContainer.querySelector('.load-more-matches-btn');
+            const contentRight = statsContainer.querySelector('.content-right');
 
             // loadMoreMatchesBtn click event
-            loadMoreMatchesBtn.addEventListener('click', async function () {
-                loadMoreMatchesBtn.replaceChildren();
-                loadMoreMatchesBtn.setAttribute('disabled', '');
+            if (loadMoreMatchesBtn) {
+                loadMoreMatchesBtn.addEventListener('click', async function () {
+                    loadMoreMatchesBtn.replaceChildren();
+                    loadMoreMatchesBtn.setAttribute('disabled', '');
 
-                loadMoreMatchesBtn.innerHTML = `<img class="loading" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB2ElEQVR4nO2VPWtUQRSGR1ER/IDgF8RGRBMLLUX8+AkpLUxAQcTGQiwsAvkDNloIYqWCiEgqSVCwiZYiKbe/ubvnPe+ZvQv6A9SR2Sx6dze613vdK2IemGo+njNzzsw4t8kmG0DypKkkJERVT7u6IHHPiNBtikdjkYQQtg2LZYYqn6ny1Qyz+b5Os3lYVW6QrTOlpaZ4EgUG3BrqMzvaFpnqD4i74vHHk6DKFw9cKCWm4tP6kcq7QoFa89T3FEQ5MV9KbIY5Uyx7L+eKjA9hdbsp3vekH0Vk2tVFo9HYYSZnRWSf+y9JkmRn4cHtdut4zFcVYax6U2nEK0eVlzEFv5xA4tp6ccjTSmLF43yFe9XLIyLFbDdK4mEVcQy8/2rJ1ZGTVPVACGFrFTGAE0ZZ6z2rb38r11WJwZM8WJvwr+C1dYWUZ17l9shK/hnx0ffA+RDCFlcAA67nC8pU7heZN4SpLMQFBj/7NE0nSLmk2rrovd/9YzyW+sSU1JWB5BESN/N/svfNY1RobldJlqWTvUDvDIhflxJvBFWe9y/ebQ9iX5Zle0zxovudKlZi4O5PYZQPg2JS3rhxQ+Lu0I5VFsYu7nQ6e414lRMv1voqmdkhAPtrE7p/nW8ue+PYdWbC1wAAAABJRU5ErkJggg==" alt="spinner-frame-5">`
+                    loadMoreMatchesBtn.innerHTML = `<img class="loading" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB2ElEQVR4nO2VPWtUQRSGR1ER/IDgF8RGRBMLLUX8+AkpLUxAQcTGQiwsAvkDNloIYqWCiEgqSVCwiZYiKbe/ubvnPe+ZvQv6A9SR2Sx6dze613vdK2IemGo+njNzzsw4t8kmG0DypKkkJERVT7u6IHHPiNBtikdjkYQQtg2LZYYqn6ny1Qyz+b5Os3lYVW6QrTOlpaZ4EgUG3BrqMzvaFpnqD4i74vHHk6DKFw9cKCWm4tP6kcq7QoFa89T3FEQ5MV9KbIY5Uyx7L+eKjA9hdbsp3vekH0Vk2tVFo9HYYSZnRWSf+y9JkmRn4cHtdut4zFcVYax6U2nEK0eVlzEFv5xA4tp6ccjTSmLF43yFe9XLIyLFbDdK4mEVcQy8/2rJ1ZGTVPVACGFrFTGAE0ZZ6z2rb38r11WJwZM8WJvwr+C1dYWUZ17l9shK/hnx0ffA+RDCFlcAA67nC8pU7heZN4SpLMQFBj/7NE0nSLmk2rrovd/9YzyW+sSU1JWB5BESN/N/svfNY1RobldJlqWTvUDvDIhflxJvBFWe9y/ebQ9iX5Zle0zxovudKlZi4O5PYZQPg2JS3rhxQ+Lu0I5VFsYu7nQ6e414lRMv1voqmdkhAPtrE7p/nW8ue+PYdWbC1wAAAABJRU5ErkJggg==" alt="spinner-frame-5">`
 
-                await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType);
-            });
+                    await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType);
+                });
+            }
 
             if (summonerData === null) {
                 await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType);
@@ -170,7 +270,7 @@ if (lastSummonerName !== summonerName) {
                 })
             }
 
-            localStorage.setItem(summonerDataKey, contentContainer.outerHTML);
+            localStorage.setItem(summonerDataKey, statsContainer.outerHTML);
             sessionStorage.setItem('lastSummonerName', summonerName);
             main.removeChild(loadingContainer);
 
@@ -178,7 +278,7 @@ if (lastSummonerName !== summonerName) {
                 main.appendChild(summonerProfileContainer);
             }
 
-            main.appendChild(contentContainer);
+            main.appendChild(statsContainer);
         } catch (err) {
             console.error(err);
             alert('정보를 불러오는데 오류가 발생하였습니다. 잠시 후 다시 시도해주세요');
@@ -241,6 +341,15 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType)
     try {
         const response = await axios.get(`/lol/matchList?puuid=${puuid}&start=${start}&startTime=${startTime}&queue=${queue[queueType]}`);
         const matchList = response.data;
+
+        // 전적이 존재하지 않을 때
+        if (matchList.length === 0 && contentRight.querySelectorAll('.match')) {
+            contentRight.innerHTML = `
+                <div class="no-match">전적이 존재하지 않습니다.</div>
+            `;
+
+            return;
+        }
 
         // 여러 매치 정보를 한 번에 보여주기 위한 fragment
         const matchesFragment = document.createDocumentFragment();
@@ -763,7 +872,7 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType)
         contentRight.insertBefore(matchesFragment, loadMoreMatchesBtn);
 
         if (matchList.length < 20) {
-            loadMoreMatchesBtn.hidden = true;
+            loadMoreMatchesBtn.remove();
         } else {
             loadMoreMatchesBtn.replaceChildren();
             loadMoreMatchesBtn.removeAttribute('disabled');
