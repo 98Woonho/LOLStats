@@ -1,5 +1,7 @@
 package com.example.lolstats.controller;
 
+import com.example.lolstats.domain.dto.RanksDto;
+import com.example.lolstats.domain.dto.SummonerDto;
 import com.example.lolstats.exception.CustomException;
 import com.example.lolstats.service.LolService;
 import lombok.extern.slf4j.Slf4j;
@@ -9,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
-
-import java.beans.ConstructorProperties;
 
 @RestController
 @RequestMapping("/lol")
@@ -39,14 +39,6 @@ public class LolController {
                 .onErrorResume(CustomException.class, e -> Mono.just(ResponseEntity.status(e.getStatus()).body(e.getMessage())));
     }
 
-    @GetMapping("/puuid")
-    public Mono<ResponseEntity<String>> getPuuid(@RequestParam("summonerName") String summonerName) {
-        return lolService.getPuuid(summonerName)
-                .map(response -> ResponseEntity.ok(response))
-                .onErrorResume(CustomException.class, e -> Mono.just(ResponseEntity.status(e.getStatus()).body(e.getMessage())));
-    }
-
-
     @GetMapping("/account")
     public Mono<ResponseEntity<String>> getAccount(@RequestParam("puuid") String puuid) {
         return lolService.getAccount(puuid)
@@ -55,9 +47,12 @@ public class LolController {
     }
 
     @GetMapping("/summoner")
-    public Mono<ResponseEntity<String>> getSummoner(@RequestParam("puuid") String puuid) {
-        return lolService.getSummoner(puuid)
-                .map(response -> ResponseEntity.ok(response))
-                .onErrorResume(CustomException.class, e -> Mono.just(ResponseEntity.status(e.getStatus()).body(e.getMessage())));
+    public SummonerDto getSummoner(@RequestParam("summonerName") String summonerName) {
+        return lolService.getSummoner(summonerName);
+    }
+
+    @GetMapping("/ranks")
+    public RanksDto getRanks(@RequestParam("summonerId") String summonerId) {
+        return lolService.getRanks(summonerId);
     }
 }
