@@ -23,24 +23,34 @@ if (lastSummonerName !== summonerName) {
         // summonerName 파라미터 값에 #가 포함되어 있는지 검사
         if (!summonerName.includes('#')) {
             // #가 포함되어 있지 안으면 404 throw
-            throw {response: {status: 404}};
+            throw {response: {data: {status: 404, message: '소환사를 찾을 수 없습니다. 게임 이름과 태그를 다시 한 번 확인 후, 재시도 해주세요.'}}};
         }
 
         const encodedSummonerName = encodeURIComponent(summonerName);
-        const response = await axios.get(`/lol/puuid?summonerName=${encodedSummonerName}`);
+
+        // 소환사 데이터 가져오기
+        const summoner = await axios.get(`/lol/summoner?summonerName=${encodedSummonerName}`);
+
+        // 소환사 랭크 정보 가져오기
+        const ranks = await axios.get(`/lol/ranks?summonerId=${summoner.data.id}`);
+        const soloRank = ranks.data.soloRank;
+        const flexRank = ranks.data.flexRank;
 
         // 응답으로 온 gameName과 tagLine이 summonerName parameter와 같은지 검사
         const gameName = summonerName.split('#')[0];
         const tagLine = summonerName.split('#')[1];
 
-        if (response.data.gameName !== gameName || response.data.tagLine !== tagLine) {
+        if (summoner.data.gameName !== gameName || summoner.data.tagLine !== tagLine) {
             // gameName과 tagLine중 하나라도 같지 않으면 404 throw
-            throw {response: {status: 404}};
+            throw {response: {data: {status: 404, message: '소환사를 찾을 수 없습니다. 게임 이름과 태그를 다시 한 번 확인 후, 재시도 해주세요.'}}};
         }
 
-        const puuid = response.data.puuid;
+        const puuid = summoner.data.puuid;
 
         saveRecentSearch(summonerName); // 로컬 스토리지의 recentSearches에 소환사 이름 저장
+
+        const profileIconId = summoner.data.profileIconId;
+        const summonerLevel = summoner.data.summonerLevel;
 
         // 갱신 시간 setting
         if (!localStorage.getItem(`renewTime_${summonerName}`)) {
@@ -68,12 +78,7 @@ if (lastSummonerName !== summonerName) {
             renewTimeStamp = '방금 전';
         }
 
-        try {
-            const response = await axios.get(`/lol/summoner?puuid=${puuid}`);
-            const profileIconId = response.data.profileIconId;
-            const summonerLevel = response.data.summonerLevel;
-
-            const summonerProfileContainer = new DOMParser().parseFromString(`
+        const summonerProfileContainer = new DOMParser().parseFromString(`
                 <div class="summoner-profile-container">
                     <div class="summoner-profile">
                         <div class="profile-icon">
@@ -89,34 +94,34 @@ if (lastSummonerName !== summonerName) {
                 </div>
                 `, 'text/html').querySelector('.summoner-profile-container');
 
-            const renewRecordBtn = summonerProfileContainer.querySelector('.renew-record-btn');
+        const renewRecordBtn = summonerProfileContainer.querySelector('.renew-record-btn');
 
-            // renewRecordBtn click event
-            renewRecordBtn.addEventListener('click', function () {
-                localStorage.setItem(`renewTime_${summonerName}`, JSON.stringify(new Date().getTime()));
+        // renewRecordBtn click event
+        renewRecordBtn.addEventListener('click', function () {
+            localStorage.setItem(`renewTime_${summonerName}`, JSON.stringify(new Date().getTime()));
 
-                const prefix = `summonerData_${summonerName}_`;
+            const prefix = `summonerData_${summonerName}_`;
 
-                for (let i = localStorage.length - 1; i >= 0; i--) {
-                    const key = localStorage.key(i);
-                    if (key.startsWith(prefix)) {
-                        localStorage.removeItem(key);
-                    }
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key.startsWith(prefix)) {
+                    localStorage.removeItem(key);
                 }
-
-                window.location.reload();
-            });
-
-            if (lastSummonerName === summonerName) {
-                main.appendChild(summonerProfileContainer);
-                main.appendChild(loadingContainer);
             }
 
-            const summonerDataKey = `summonerData_${summonerName}_${queueType === null ? 'ALL' : queueType}`; // 저장될 데이터의 키 (소환사 이름을 기반으로 저장)
-            const summonerData = localStorage.getItem(summonerDataKey); // 로컬 저장소에서 소환사 데이터 가져오기
+            window.location.reload();
+        });
 
-            const contentContainerHtml = summonerData || `
-            <div class="content-container">
+        if (lastSummonerName === summonerName) {
+            main.appendChild(summonerProfileContainer);
+            main.appendChild(loadingContainer);
+        }
+
+        const summonerDataKey = `summonerData_${summonerName}_${queueType === null ? 'ALL' : queueType}`; // 저장될 데이터의 키 (소환사 이름을 기반으로 저장)
+        const summonerData = localStorage.getItem(summonerDataKey); // 로컬 저장소에서 소환사 데이터 가져오기
+
+        const statsContainerHtml = summonerData || `
+            <div class="stats-container">
                 <ul class="queue-type-container">
                     <li>
                         <a href="/summoners?summonerName=${encodedSummonerName}&queueType=ALL">전체</a>
@@ -125,7 +130,7 @@ if (lastSummonerName !== summonerName) {
                         <a href="/summoners?summonerName=${encodedSummonerName}&queueType=SOLORANK">개인/2인 랭크 게임</a>
                     </li>
                     <li>
-                        <a href="/summoners?summonerName=${encodedSummonerName}&queueType=FREERANK">자유 랭크 게임</a>
+                        <a href="/summoners?summonerName=${encodedSummonerName}&queueType=FREXRANK">자유 랭크 게임</a>
                     </li>
                     <li>
                         <a href="/summoners?summonerName=${encodedSummonerName}&queueType=NORMAL">일반</a>
@@ -134,20 +139,56 @@ if (lastSummonerName !== summonerName) {
                         <a href="/summoners?summonerName=${encodedSummonerName}&queueType=ARAM">무작위 총력전</a>
                     </li>
                 </ul>
-                <div class="stats-container" id="statsContainer">
-                    <div class="content-left"></div>
+                <div class="content-container" id="contentContainer">
+                    <div class="content-left">
+                        ${queueType === 'ALL' || queueType === 'SOLORANK' ? `
+                        <div class="rank-info">
+                            <div class="header">개인/2인 랭크 게임</div>
+                            <div class="content">
+                                <img src="/images/rank-emblems/${soloRank.tier}.png" alt=""/>
+                                <div class="tier-info">
+                                    <p class="tier">${soloRank.tier}</p>
+                                    ${soloRank.tier !== 'Unranked' ? `
+                                    <p class="lp">${soloRank.leaguePoints} LP</p>` : ``}
+                                </div>
+                                ${soloRank.tier !== 'Unranked' ? `
+                                <div class="win-lose-info">
+                                    <p class="win-lose">${soloRank.wins}승 ${soloRank.losses}패</p>
+                                    <p class="rate">${Math.round(soloRank.wins * 100 / (soloRank.wins + soloRank.losses))}%</p>
+                                </div>` : ``}
+                            </div>
+                        </div>` : ``}
+                        ${queueType === 'ALL' || queueType === 'FREXRANK' ? `
+                        <div class="rank-info">
+                            <div class="header">자유 랭크 게임</div>
+                            <div class="content">
+                                <img src="/images/rank-emblems/${flexRank.tier}.png" alt=""/>
+                                <div class="tier-info">
+                                    <p class="tier">${flexRank.tier}</p>
+                                    ${flexRank.tier !== 'Unranked' ? `
+                                    <p class="lp">${flexRank.leaguePoints} LP</p>` : ``}
+                                </div>
+                                ${flexRank.tier !== 'Unranked' ? `
+                                <div class="win-lose-info">
+                                    <p class="win-lose">${flexRank.wins}승 ${flexRank.losses}패</p>
+                                    <p class="rate">${Math.round(flexRank.wins * 100 / (flexRank.wins + flexRank.losses))}%</p>
+                                </div>` : ``}
+                            </div>
+                        </div>` : ``}
+                    </div>
                     <div class="content-right">
                         <button class="load-more-matches-btn">Load More</button>
                     </div>
                 </div>
             </div>`;
 
-            const contentContainer = new DOMParser().parseFromString(contentContainerHtml, 'text/html').querySelector('.content-container');
+        const statsContainer = new DOMParser().parseFromString(statsContainerHtml, 'text/html').querySelector('.stats-container');
 
-            const loadMoreMatchesBtn = contentContainer.querySelector('.load-more-matches-btn');
-            const contentRight = contentContainer.querySelector('.content-right');
+        const loadMoreMatchesBtn = statsContainer.querySelector('.load-more-matches-btn');
+        const contentRight = statsContainer.querySelector('.content-right');
 
-            // loadMoreMatchesBtn click event
+        // loadMoreMatchesBtn click event
+        if (loadMoreMatchesBtn) {
             loadMoreMatchesBtn.addEventListener('click', async function () {
                 loadMoreMatchesBtn.replaceChildren();
                 loadMoreMatchesBtn.setAttribute('disabled', '');
@@ -156,57 +197,34 @@ if (lastSummonerName !== summonerName) {
 
                 await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType);
             });
-
-            if (summonerData === null) {
-                await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType);
-            } else {
-                const matches = contentRight.querySelectorAll('.match');
-                matches.forEach(match => {
-                    const matchDetailBtn = match.querySelector('.match-detail-btn');
-                    const matchDetail = match.querySelector('.match-detail');
-                    matchDetailBtn.addEventListener('click', function () {
-                        matchDetail.classList.toggle('opened');
-                    })
-                })
-            }
-
-            localStorage.setItem(summonerDataKey, contentContainer.outerHTML);
-            sessionStorage.setItem('lastSummonerName', summonerName);
-            main.removeChild(loadingContainer);
-
-            if (lastSummonerName !== summonerName) {
-                main.appendChild(summonerProfileContainer);
-            }
-
-            main.appendChild(contentContainer);
-        } catch (err) {
-            console.error(err);
-            alert('정보를 불러오는데 오류가 발생하였습니다. 잠시 후 다시 시도해주세요');
         }
+
+        if (summonerData === null) {
+            await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType);
+        } else {
+            const matches = contentRight.querySelectorAll('.match');
+            matches.forEach(match => {
+                const matchDetailBtn = match.querySelector('.match-detail-btn');
+                const matchDetail = match.querySelector('.match-detail');
+                matchDetailBtn.addEventListener('click', function () {
+                    matchDetail.classList.toggle('opened');
+                })
+            })
+        }
+
+        localStorage.setItem(summonerDataKey, statsContainer.outerHTML);
+        sessionStorage.setItem('lastSummonerName', summonerName);
+        main.removeChild(loadingContainer);
+
+        if (lastSummonerName !== summonerName) {
+            main.appendChild(summonerProfileContainer);
+        }
+
+        main.appendChild(statsContainer);
 
     } catch (err) {
-        let errorMessage;
-        const status = err.response.status;
-
-        switch (status) {
-            case 404:
-                errorMessage = '소환사를 찾을 수 없습니다. 게임 이름과 태그를 다시 한 번 확인 후, 재시도 해주세요.';
-                break;
-            case 400:
-            case 401:
-            case 403:
-            case 405:
-            case 415:
-            case 429:
-            case 500:
-            case 502:
-            case 503:
-            case 504:
-                errorMessage = '서버와 통신하는 도중 오류가 발생하였습니다. 잠시 후 다시 시도해 주세요.';
-                break;
-            default:
-                errorMessage = '알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
-        }
+        const errorMessage = err.response.data.message;
+        const status = err.response.data.status;
 
         const error = new DOMParser().parseFromString(`
         <div class="error">
@@ -231,16 +249,25 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType)
     const startTime = Math.floor(renewTime.getTime() / 1000); // 3개월 이전까지의 전적을 가져오기 위한 3개월 전의 Epoch Timestamp(초 단위)
 
     const queue = {
-        'ALL' : 0,
-        'SOLORANK' : 420,
-        'FREERANK' : 440,
-        'NORMAL' : 490,
-        'ARAM' : 450
+        'ALL': 0,
+        'SOLORANK': 420,
+        'FREXRANK': 440,
+        'NORMAL': 490,
+        'ARAM': 450
     };
 
     try {
         const response = await axios.get(`/lol/matchList?puuid=${puuid}&start=${start}&startTime=${startTime}&queue=${queue[queueType]}`);
         const matchList = response.data;
+
+        // 전적이 존재하지 않을 때
+        if (matchList.length === 0 && contentRight.querySelectorAll('.match')) {
+            contentRight.innerHTML = `
+                <div class="no-match">전적이 존재하지 않습니다.</div>
+            `;
+
+            return;
+        }
 
         // 여러 매치 정보를 한 번에 보여주기 위한 fragment
         const matchesFragment = document.createDocumentFragment();
@@ -763,7 +790,7 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType)
         contentRight.insertBefore(matchesFragment, loadMoreMatchesBtn);
 
         if (matchList.length < 20) {
-            loadMoreMatchesBtn.hidden = true;
+            loadMoreMatchesBtn.remove();
         } else {
             loadMoreMatchesBtn.replaceChildren();
             loadMoreMatchesBtn.removeAttribute('disabled');

@@ -19,8 +19,9 @@ a:focus {
 }
 
 :root {
-     --font-primary: #E8E7E5;
- }
+    --font-primary: #E8E7E5;
+    --font-primary1: #9E9EB1;
+}
 
 body {
     font-family: 'Pretendard-Regular', sans-serif;

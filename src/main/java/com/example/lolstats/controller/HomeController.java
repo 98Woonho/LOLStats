@@ -2,7 +2,6 @@ package com.example.lolstats.controller;
 
 
 import com.example.lolstats.domain.dto.SummonerDto;
-import com.example.lolstats.domain.dto.SummonerLeagueDto;
 import com.example.lolstats.service.SummonerService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -65,12 +64,6 @@ public class HomeController {
 //            }
 //        }
 
-        List<SummonerLeagueDto> summonerLeagueDtos = webClient.get()
-                .uri("https://kr.api.riotgames.com/lol/league/v4/entries/{queue}/{tier}/{division}?page=1", queue, "IRON", "I")
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<SummonerLeagueDto>>() {})
-                .block();
-
         // tier(티어)
         // rank(랭크)
         // leaguePoints(LP)
@@ -79,14 +72,6 @@ public class HomeController {
         // puuid(유저 고유 id)
         // gameName(게임 이름)
         // tagName(태그 이름)
-        for (SummonerLeagueDto league : summonerLeagueDtos) {
-            SummonerDto summonerDto = webClient.get()
-                    .uri("https://kr.api.riotgames.com/lol/summoner/v4/summoners/{summonerId}", league.getSummonerId())
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<com.example.lolstats.domain.dto.SummonerDto>() {
-                    })
-                    .block();
-        }
 
 //        Summoner summoner = Summoner.builder()
 //                .puuid("test")
