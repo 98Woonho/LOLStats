@@ -17,6 +17,27 @@ main::after {
     z-index: -1;
 }
 
+.test {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--font-primary);
+    text-align: center;
+}
+
+.test button {
+    margin-top: 10px;
+    border: none;
+    background-color: #A9AEBD;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.test button:hover {
+    cursor: pointer;
+}
+
 .search-container {
     top: 60%;
 }
