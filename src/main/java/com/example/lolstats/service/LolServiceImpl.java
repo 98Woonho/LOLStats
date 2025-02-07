@@ -192,7 +192,7 @@ public class LolServiceImpl implements LolService {
 
                 SoloRank soloRank;
                 FlexRank flexRank;
-
+              
                 if (ranks.isEmpty()) {
                     soloRank = new SoloRank(summonerId, 0, 0, 0, 0, 0);
                     flexRank = new FlexRank(summonerId, 0, 0, 0, 0, 0);
