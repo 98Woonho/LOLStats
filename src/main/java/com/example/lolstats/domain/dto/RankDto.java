@@ -75,7 +75,7 @@ public class RankDto {
                 this.tier = "Grandmaster";
                 break;
             case 10:
-                this.tier = "Chanllenger";
+                this.tier = "Challenger";
                 break;
             default:
                 this.tier = "Unranked";
@@ -132,7 +132,7 @@ public class RankDto {
                 this.tier = "Grandmaster";
                 break;
             case 10:
-                this.tier = "Chanllenger";
+                this.tier = "Challenger";
                 break;
             default:
                 this.tier = "Unranked";

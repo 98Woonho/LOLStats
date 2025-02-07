@@ -148,12 +148,14 @@ if (lastSummonerName !== summonerName) {
                                 <img src="/images/rank-emblems/${soloRank.tier}.png" alt=""/>
                                 <div class="tier-info">
                                     <p class="tier">${soloRank.tier}</p>
-                                    <p class="lp">${soloRank.leaguePoints} LP</p>
+                                    ${soloRank.tier !== 'Unranked' ? `
+                                    <p class="lp">${soloRank.leaguePoints} LP</p>` : ``}
                                 </div>
+                                ${soloRank.tier !== 'Unranked' ? `
                                 <div class="win-lose-info">
                                     <p class="win-lose">${soloRank.wins}승 ${soloRank.losses}패</p>
                                     <p class="rate">${Math.round(soloRank.wins * 100 / (soloRank.wins + soloRank.losses))}%</p>
-                                </div>
+                                </div>` : ``}
                             </div>
                         </div>` : ``}
                         ${queueType === 'ALL' || queueType === 'FREXRANK' ? `
@@ -163,12 +165,14 @@ if (lastSummonerName !== summonerName) {
                                 <img src="/images/rank-emblems/${flexRank.tier}.png" alt=""/>
                                 <div class="tier-info">
                                     <p class="tier">${flexRank.tier}</p>
-                                    <p class="lp">${flexRank.leaguePoints} LP</p>
+                                    ${flexRank.tier !== 'Unranked' ? `
+                                    <p class="lp">${flexRank.leaguePoints} LP</p>` : ``}
                                 </div>
+                                ${flexRank.tier !== 'Unranked' ? `
                                 <div class="win-lose-info">
                                     <p class="win-lose">${flexRank.wins}승 ${flexRank.losses}패</p>
                                     <p class="rate">${Math.round(flexRank.wins * 100 / (flexRank.wins + flexRank.losses))}%</p>
-                                </div>
+                                </div>` : ``}
                             </div>
                         </div>` : ``}
                     </div>
