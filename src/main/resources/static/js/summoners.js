@@ -5,6 +5,7 @@ const summonerName = urlParams.get('summonerName'); // summonerName 파라미터
 const queueType = urlParams.get('queueType') || 'ALL'; // queueType 파라미터 값 가져오기
 const lastSummonerName = sessionStorage.getItem('lastSummonerName') || ''; // sessionStorage에서 lastSummonerName 값 가져오기
 let start = 0;
+let championStatsData = {}; // 챔피언 전적을 저장할 객체
 
 const loadingContainer = new DOMParser().parseFromString(`
     <div id="loadingContainer" class="loading-container">
@@ -124,19 +125,19 @@ if (lastSummonerName !== summonerName) {
             <div class="stats-container">
                 <ul class="queue-type-container">
                     <li>
-                        <a href="/summoners?summonerName=${encodedSummonerName}&queueType=ALL">전체</a>
+                        <a class="${queueType === 'ALL' ? 'selected' : ''}" href="/summoners?summonerName=${encodedSummonerName}&queueType=ALL">전체</a>
                     </li>   
                     <li>
-                        <a href="/summoners?summonerName=${encodedSummonerName}&queueType=SOLORANK">개인/2인 랭크 게임</a>
+                        <a class="${queueType === 'SOLORANK' ? 'selected' : ''}" href="/summoners?summonerName=${encodedSummonerName}&queueType=SOLORANK">개인/2인 랭크 게임</a>
                     </li>
                     <li>
-                        <a href="/summoners?summonerName=${encodedSummonerName}&queueType=FREXRANK">자유 랭크 게임</a>
+                        <a class="${queueType === 'FLEXRANK' ? 'selected' : ''}" href="/summoners?summonerName=${encodedSummonerName}&queueType=FLEXRANK">자유 랭크 게임</a>
                     </li>
                     <li>
-                        <a href="/summoners?summonerName=${encodedSummonerName}&queueType=NORMAL">일반</a>
+                        <a class="${queueType === 'NORMAL' ? 'selected' : ''}" href="/summoners?summonerName=${encodedSummonerName}&queueType=NORMAL">일반</a>
                     </li>
                     <li>
-                        <a href="/summoners?summonerName=${encodedSummonerName}&queueType=ARAM">무작위 총력전</a>
+                        <a class="${queueType === 'ARAM' ? 'selected' : ''}" href="/summoners?summonerName=${encodedSummonerName}&queueType=ARAM">무작위 총력전</a>
                     </li>
                 </ul>
                 <div class="content-container" id="contentContainer">
@@ -158,7 +159,7 @@ if (lastSummonerName !== summonerName) {
                                 </div>` : ``}
                             </div>
                         </div>` : ``}
-                        ${queueType === 'ALL' || queueType === 'FREXRANK' ? `
+                        ${queueType === 'ALL' || queueType === 'FLEXRANK' ? `
                         <div class="rank-info">
                             <div class="header">자유 랭크 게임</div>
                             <div class="content">
@@ -175,6 +176,9 @@ if (lastSummonerName !== summonerName) {
                                 </div>` : ``}
                             </div>
                         </div>` : ``}
+                        <div class="champion-stats">
+                            <div class="header">최근 플레이한 챔피언</div>
+                        </div>
                     </div>
                     <div class="content-right">
                         <button class="load-more-matches-btn">Load More</button>
@@ -186,6 +190,7 @@ if (lastSummonerName !== summonerName) {
 
         const loadMoreMatchesBtn = statsContainer.querySelector('.load-more-matches-btn');
         const contentRight = statsContainer.querySelector('.content-right');
+        const championStats = statsContainer.querySelector('.champion-stats');
 
         // loadMoreMatchesBtn click event
         if (loadMoreMatchesBtn) {
@@ -195,22 +200,27 @@ if (lastSummonerName !== summonerName) {
 
                 loadMoreMatchesBtn.innerHTML = `<img class="loading" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB2ElEQVR4nO2VPWtUQRSGR1ER/IDgF8RGRBMLLUX8+AkpLUxAQcTGQiwsAvkDNloIYqWCiEgqSVCwiZYiKbe/ubvnPe+ZvQv6A9SR2Sx6dze613vdK2IemGo+njNzzsw4t8kmG0DypKkkJERVT7u6IHHPiNBtikdjkYQQtg2LZYYqn6ny1Qyz+b5Os3lYVW6QrTOlpaZ4EgUG3BrqMzvaFpnqD4i74vHHk6DKFw9cKCWm4tP6kcq7QoFa89T3FEQ5MV9KbIY5Uyx7L+eKjA9hdbsp3vekH0Vk2tVFo9HYYSZnRWSf+y9JkmRn4cHtdut4zFcVYax6U2nEK0eVlzEFv5xA4tp6ccjTSmLF43yFe9XLIyLFbDdK4mEVcQy8/2rJ1ZGTVPVACGFrFTGAE0ZZ6z2rb38r11WJwZM8WJvwr+C1dYWUZ17l9shK/hnx0ffA+RDCFlcAA67nC8pU7heZN4SpLMQFBj/7NE0nSLmk2rrovd/9YzyW+sSU1JWB5BESN/N/svfNY1RobldJlqWTvUDvDIhflxJvBFWe9y/ebQ9iX5Zle0zxovudKlZi4O5PYZQPg2JS3rhxQ+Lu0I5VFsYu7nQ6e414lRMv1voqmdkhAPtrE7p/nW8ue+PYdWbC1wAAAABJRU5ErkJggg==" alt="spinner-frame-5">`
 
-                await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType);
+                await renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType);
+
+                championStatsData = {};
+
+                contentRight.querySelectorAll('.match').forEach(match => {
+                     processMatchData(match)
+                });
+
+                await renderChampionStats(championStats);
             });
         }
 
         if (summonerData === null) {
-            await addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType);
-        } else {
-            const matches = contentRight.querySelectorAll('.match');
-            matches.forEach(match => {
-                const matchDetailBtn = match.querySelector('.match-detail-btn');
-                const matchDetail = match.querySelector('.match-detail');
-                matchDetailBtn.addEventListener('click', function () {
-                    matchDetail.classList.toggle('opened');
-                })
-            })
+            await renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType);
         }
+
+        contentRight.querySelectorAll('.match').forEach(match => {
+            processMatchData(match);
+        });
+
+        await renderChampionStats(championStats);
 
         localStorage.setItem(summonerDataKey, statsContainer.outerHTML);
         sessionStorage.setItem('lastSummonerName', summonerName);
@@ -223,6 +233,7 @@ if (lastSummonerName !== summonerName) {
         main.appendChild(statsContainer);
 
     } catch (err) {
+        console.log(err);
         const errorMessage = err.response.data.message;
         const status = err.response.data.status;
 
@@ -242,8 +253,10 @@ if (lastSummonerName !== summonerName) {
     }
 })();
 
-// 매치들 정보 DOM을 추가하는 함수
-async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType) {
+// async function addChampionStatsDOM()
+
+// 매치정보를 UI에 표시하는 함수
+async function renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType) {
     const renewTime = new Date(Number(localStorage.getItem(`renewTime_${summonerName}`))); // 갱신 시간
     renewTime.setMonth(renewTime.getMonth() - 3); // 3개월 전 날짜
     const startTime = Math.floor(renewTime.getTime() / 1000); // 3개월 이전까지의 전적을 가져오기 위한 3개월 전의 Epoch Timestamp(초 단위)
@@ -251,7 +264,7 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType)
     const queue = {
         'ALL': 0,
         'SOLORANK': 420,
-        'FREXRANK': 440,
+        'FLEXRANK': 440,
         'NORMAL': 490,
         'ARAM': 450
     };
@@ -484,7 +497,7 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType)
                                             <div>
                                                 <p class="label">K / D / A</p>
                                                 <p class="kda value">
-                                                    <span>${myInfo.kills}</span>&thinsp;/&thinsp;<span class="d">${myInfo.deaths}</span>&thinsp;/&thinsp;<span>${myInfo.assists}</span></p>
+                                                    ${myInfo.kills}&thinsp;/&thinsp;${myInfo.deaths}&thinsp;/&thinsp;${myInfo.assists}</p>
                                             </div>
                                             <div>
                                                 <p class="label">KA / D</p>
@@ -649,14 +662,6 @@ async function addMatchesDOM(puuid, contentRight, loadMoreMatchesBtn, queueType)
                                 </div>
                             </div>
                         `, 'text/html');
-
-                // 매치 상세 정보 버튼 클릭 이벤트 추가
-                const matchDetailBtn = match.querySelector('.match-detail-btn');
-                const matchDetail = match.querySelector('.match-detail');
-
-                matchDetailBtn.addEventListener('click', function () {
-                    matchDetail.classList.toggle('opened');
-                })
 
                 const tables = match.querySelectorAll('.match-detail > table');
 
@@ -863,7 +868,7 @@ async function getSubRuneUrl(subRuneStyleId) {
 }
 
 // 검색한 소환사 이름을 최근 검색 로컬 스토리지에 저장 & 최근 검색어 목록에 추가하는 함수
-function saveRecentSearch(summonerName) {
+async function saveRecentSearch(summonerName) {
     const max = 10;
     let recentSearches = JSON.parse(localStorage.getItem('recentSearches')) || [];
 
@@ -898,4 +903,59 @@ function saveRecentSearch(summonerName) {
     `, 'text/html').querySelector('li');
 
     ul.prepend(li); // ul의 첫 번째 자식으로 추가
+}
+
+// match 데이터를 처리하는 함수
+function processMatchData(match) {
+    const matchDetailBtn = match.querySelector('.match-detail-btn');
+    const matchDetail = match.querySelector('.match-detail');
+
+    matchDetailBtn.addEventListener('click', function () {
+        matchDetail.classList.toggle('opened');
+    })
+
+    const kdaText = match.querySelector(".kda.value").innerText.trim();
+    const [kills, deaths, assists] = kdaText.split(" / ").map(Number);
+    const championImg = match.querySelector('.champion img').src;
+
+    if (!championStatsData[championImg]) {
+        championStatsData[championImg] = {
+            games: 0,
+            wins: 0,
+            losses: 0,
+            kills: 0,
+            deaths: 0,
+            assists: 0
+        };
+    }
+
+    championStatsData[championImg].games++;
+    championStatsData[championImg].wins += match.classList.contains('win') ? 1 : 0;
+    championStatsData[championImg].losses += !match.classList.contains('win') ? 1 : 0;
+    championStatsData[championImg].kills += kills;
+    championStatsData[championImg].deaths += deaths;
+    championStatsData[championImg].assists += assists;
+}
+
+async function renderChampionStats(championStats) {
+    const sortedChampionStatsData = Object.entries(championStatsData).sort((a, b) => b[1].games - a[1].games);
+
+    championStats.innerHTML = '<div class="header">최근 플레이한 챔피언</div>';
+
+    sortedChampionStatsData.forEach(([champion, stats]) => {
+        const content = document.createElement('div');
+        content.classList.add('content');
+        const { games, wins, losses, kills, deaths, assists } = stats;
+
+        content.innerHTML = `
+                        <img src="${champion}" alt="">
+                        <div>${kills} / ${deaths} / ${assists}</div>
+                        <div class="win-lose-info">
+                            <p>${wins}승 ${losses}패</p>
+                            <div>${games} 경기</div>
+                        </div>
+                    `;
+
+        championStats.appendChild(content);
+    });
 }
