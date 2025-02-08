@@ -139,11 +139,16 @@
     display: flex;
     flex-direction: row;
     padding: 5px;
+    gap: 8px;
 }
 
 .queue-type-container a {
     display: inline-block;
     padding: 15px 40px;
+}
+
+.queue-type-container a.selected {
+    background-color: #27292B;
 }
 
 .queue-type-container a:hover {
@@ -201,6 +206,34 @@
 
 .rank-info .win-lose-info {
     line-height: 25px;
+}
+
+.champion-stats {
+    background-color: #3E3E45;
+    border-radius: 5px;
+    min-height: 100px;
+}
+
+.champion-stats .header {
+    padding: 8px 12px;
+    border-bottom: 2px solid #1C1C1F;
+}
+
+.champion-stats .content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.champion-stats img {
+    border-radius: 50%;
+    width: 60px;
+}
+
+.champion-stats .win-lose-info {
+    text-align: right;
 }
 
 .content-right {
