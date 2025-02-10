@@ -224,16 +224,42 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 10px 15px;
+    font-size: 14px;
 }
 
-.champion-stats img {
+.champion-stats .content .champion-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 120px;
+    gap: 5px;
+}
+
+.champion-stats .content .champion-info img {
     border-radius: 50%;
-    width: 60px;
+    width: 40px;
 }
 
-.champion-stats .win-lose-info {
+.champion-stats .content .champion-info p {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.champion-stats .content .kda-info {
+    text-align: center;
+    line-height: 20px;
+    padding-right: 40px;
+}
+
+.champion-stats .content .win-lose-info {
     text-align: right;
+    line-height: 17px;
+}
+
+.champion-stats .content .win-lose-info p:nth-child(2) {
+    font-size: 13px;
 }
 
 .content-right {
