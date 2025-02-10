@@ -1,4 +1,5 @@
 const version = '15.1.1';
+const championsJsonUrl = '/json/champions.json';
 const main = document.getElementById('main');
 const urlParams = new URLSearchParams(window.location.search); // 현재 URL에서 쿼리 파라미터를 가져오기
 const summonerName = urlParams.get('summonerName'); // summonerName 파라미터 값 가져오기
@@ -48,7 +49,7 @@ if (lastSummonerName !== summonerName) {
 
         const puuid = summoner.data.puuid;
 
-        saveRecentSearch(summonerName); // 로컬 스토리지의 recentSearches에 소환사 이름 저장
+        await saveRecentSearch(summonerName); // 로컬 스토리지의 recentSearches에 소환사 이름 저장
 
         const profileIconId = summoner.data.profileIconId;
         const summonerLevel = summoner.data.summonerLevel;
@@ -204,9 +205,9 @@ if (lastSummonerName !== summonerName) {
 
                 championStatsData = {};
 
-                contentRight.querySelectorAll('.match').forEach(match => {
-                     processMatchData(match)
-                });
+                for (const match of contentRight.querySelectorAll('.match')) {
+                     await processMatchData(match)
+                }
 
                 await renderChampionStats(championStats);
             });
@@ -216,9 +217,9 @@ if (lastSummonerName !== summonerName) {
             await renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType);
         }
 
-        contentRight.querySelectorAll('.match').forEach(match => {
-            processMatchData(match);
-        });
+        for (const match of contentRight.querySelectorAll('.match')) {
+            await processMatchData(match);
+        }
 
         await renderChampionStats(championStats);
 
@@ -288,6 +289,7 @@ async function renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType)
         for (const matchId of matchList) {
             try {
                 const response = await axios.get('/lol/match?matchId=' + matchId);
+
                 const info = response.data.info;
 
                 // 타임 스탬프
@@ -359,7 +361,6 @@ async function renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType)
                 for (const participant of participants) {
                     maxTakenDamage = Math.max(maxTakenDamage, participant.totalDamageTaken);
                 }
-
 
                 // 내 정보
                 const myInfo = participants.find(participant => puuid === participant.puuid);
@@ -906,7 +907,7 @@ async function saveRecentSearch(summonerName) {
 }
 
 // match 데이터를 처리하는 함수
-function processMatchData(match) {
+async function processMatchData(match) {
     const matchDetailBtn = match.querySelector('.match-detail-btn');
     const matchDetail = match.querySelector('.match-detail');
 
@@ -917,9 +918,20 @@ function processMatchData(match) {
     const kdaText = match.querySelector(".kda.value").innerText.trim();
     const [kills, deaths, assists] = kdaText.split(" / ").map(Number);
     const championImg = match.querySelector('.champion img').src;
+    const championName = championImg.split('/').pop().split('.')[0];
 
-    if (!championStatsData[championImg]) {
-        championStatsData[championImg] = {
+    const response = await fetch(championsJsonUrl);
+    if (!response.ok) {
+        throw new Error('Failed to fetch JSON data');
+    }
+
+    const champions = await response.json();
+    const championInfo = champions.data[championName];
+    const championNameKR = championInfo.name;
+
+    if (!championStatsData[championName]) {
+        championStatsData[championName] = {
+            championNameKR: championNameKR,
             games: 0,
             wins: 0,
             losses: 0,
@@ -929,12 +941,12 @@ function processMatchData(match) {
         };
     }
 
-    championStatsData[championImg].games++;
-    championStatsData[championImg].wins += match.classList.contains('win') ? 1 : 0;
-    championStatsData[championImg].losses += !match.classList.contains('win') ? 1 : 0;
-    championStatsData[championImg].kills += kills;
-    championStatsData[championImg].deaths += deaths;
-    championStatsData[championImg].assists += assists;
+    championStatsData[championName].games++;
+    championStatsData[championName].wins += match.classList.contains('win') ? 1 : 0;
+    championStatsData[championName].losses += !match.classList.contains('win') ? 1 : 0;
+    championStatsData[championName].kills += kills;
+    championStatsData[championName].deaths += deaths;
+    championStatsData[championName].assists += assists;
 }
 
 async function renderChampionStats(championStats) {
@@ -942,19 +954,25 @@ async function renderChampionStats(championStats) {
 
     championStats.innerHTML = '<div class="header">최근 플레이한 챔피언</div>';
 
-    sortedChampionStatsData.forEach(([champion, stats]) => {
+    sortedChampionStatsData.forEach(([championName, stats]) => {
         const content = document.createElement('div');
         content.classList.add('content');
-        const { games, wins, losses, kills, deaths, assists } = stats;
+        const { championNameKR, games, wins, losses, kills, deaths, assists } = stats;
 
         content.innerHTML = `
-                        <img src="${champion}" alt="">
-                        <div>${kills} / ${deaths} / ${assists}</div>
-                        <div class="win-lose-info">
-                            <p>${wins}승 ${losses}패</p>
-                            <div>${games} 경기</div>
-                        </div>
-                    `;
+            <div class="champion-info">
+                <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/champion/${championName}.png" alt="">
+                <p>${championNameKR}</p>
+            </div>
+            <div class="kda-info">
+                <div>${kills} / ${deaths} / ${assists}</div>
+                <p>${((kills + assists) / deaths).toFixed(2)}:1</p>
+            </div>
+            <div class="win-lose-info">
+                <p>${wins}승 ${losses}패</p>
+                <p>${games} 경기</p>
+            </div>
+        `;
 
         championStats.appendChild(content);
     });
