@@ -182,6 +182,7 @@ public class LolServiceImpl implements LolService {
         SoloRank existingSoloRank = soloRankRepository.findBySummonerId(summonerId);
         FlexRank existingFlexRank = flexRankRepository.findBySummonerId(summonerId);
 
+
         if (existingSoloRank == null || existingFlexRank == null) {
             try {
                 List<RankDto> ranks = webClient.get()
@@ -194,13 +195,13 @@ public class LolServiceImpl implements LolService {
                 FlexRank flexRank;
               
                 if (ranks.isEmpty()) {
-                    soloRank = new SoloRank(summonerId, 0, 0, 0, 0, 0);
-                    flexRank = new FlexRank(summonerId, 0, 0, 0, 0, 0);
+                    soloRank = new SoloRank(summonerId, 0, 0, 0, 0, 0, 0);
+                    flexRank = new FlexRank(summonerId, 0, 0, 0, 0, 0, 0);
                 } else if (ranks.size() == 1) {
                     RankDto rank = ranks.getFirst();
 
-                    soloRank = rank.getQueueType().equals("RANKED_FLEX_SR") ? new SoloRank(summonerId, 0, 0, 0, 0, 0) : new SoloRank(rank);
-                    flexRank = rank.getQueueType().equals("RANKED_FLEX_SR") ? new FlexRank(rank) : new FlexRank(summonerId, 0, 0, 0, 0, 0);
+                    soloRank = rank.getQueueType().equals("RANKED_FLEX_SR") ? new SoloRank(summonerId, 0, 0, 0, 0, 0, 0) : new SoloRank(rank);
+                    flexRank = rank.getQueueType().equals("RANKED_FLEX_SR") ? new FlexRank(rank) : new FlexRank(summonerId, 0, 0, 0, 0, 0, 0);
                 } else {
                     soloRank = new SoloRank(ranks.get(0));
                     flexRank = new FlexRank(ranks.get(1));

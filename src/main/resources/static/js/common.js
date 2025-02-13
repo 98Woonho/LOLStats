@@ -16,11 +16,11 @@ const recentSearches = JSON.parse(localStorage.getItem('recentSearches')) || [];
 const ul = recentSearchContainer.querySelector('ul'); // 최근 검색어를 담을 ul
 
 for (const recentSearch of recentSearches) {
-    const [gameName, tagLine] =  recentSearch.split('#');
+    const [gameName, tagLine] = recentSearch.split('#');
 
     const li = new DOMParser().parseFromString(`
         <li>
-            <a href="/summoners?summonerName=${encodeURIComponent(recentSearch)}">${gameName}<span class="tag-line">#${tagLine}</span></a>
+            <a href="/summoners/${encodeURIComponent(recentSearch)}/ALL">${gameName}<span class="tag-line">#${tagLine}</span></a>
             <button type="button" class="delete-recent-search-btn">
                 <img class="x" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA5ElEQVR4nO2UTU4CQRCF5wZMOAEcUdh5LILar97r1BZJ9CoaWSBuIAOZYIZhbGjckHlJb7oq+fLqryh69aol2WMUPiUEdy+LDrl7KRqi7DsSD0WqRHxE2fbwsDwHcveyite5ItbJkEibHSHtIG8A9o9myRCSA9EWDdB7CGFYxyPttQF4q+PZIADjmwC6SiLi569SXqx2R5bv4NTRyyjKNg3Ipvq/CaC1yTodhgwH/9wTnhlTAOOu8c4GhF97kg2KtOdrNl7EUzJExOq622Vf6RDZtDqSEuZJV1iYV/kkJsmQXvevHUgt1YwHOHhtAAAAAElFTkSuQmCC" alt="multiply">
             </button>
@@ -43,3 +43,14 @@ for (const recentSearch of recentSearches) {
 }
 
 recentSearchContainer.appendChild(ul);
+
+const searchInfoForm = document.getElementById('searchInfoForm');
+
+if (searchInfoForm) {
+    searchInfoForm.onsubmit = function (event) {
+        event.preventDefault();
+        if (summonerNameInput.value) {
+            window.location.href = `/summoners/${encodeURIComponent(summonerNameInput.value)}/ALL`;
+        }
+    }
+}

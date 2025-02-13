@@ -1,28 +1,24 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>LOLStats</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@4.0.1/reset.min.css"
     />
     <link rel="stylesheet" th:href="@{/css/common.css}">
-    <link rel="stylesheet" th:href="@{/css/summoners.css}">
+    <link rel="stylesheet" th:href="@{/css/rankings.css}">
 
     <script defer th:src="@{/js/common.js}"></script>
-    <script defer th:src="@{/js/summoners.js}"></script>
+    <script defer th:src="@{/js/rankings.js}"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"
             integrity="sha512-uMtXmF28A2Ab/JJO2t/vYhlaa/3ahUOgj1Zf27M5rOo8/+fcTUVH0/E0ll68njmjrLqOBjXM3V9NiPFL5ywWPQ=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
 </head>
 <body>
 
 <header>
-    <div th:text="${summoner}"></div>
     <div class="logo-container">
         <a th:href="@{/}"><img src="https://fontmeme.com/permalink/250121/7ec9e6d64f6fcc3e74a03c379eedd2bc.png" alt="smooch-sans-font" border="0"></a>
     </div>
@@ -64,11 +60,56 @@
     </div>
 </header>
 
-<main id="main">
+<main>
+    <div class="header">
+        <h1>랭킹</h1>
+        <ul class="queue-type">
+            <li>
+                <a href="/rankings?queueType=SOLORANK">솔로 랭크</a>
+            </li>
+            <li>
+                <a href="/rankings?queueType=FLEXRANK">자유 랭크</a>
+            </li>
+        </ul>
+    </div>
+    <div class="content-container">
+        <div class="filter-container">
+            <div class="tier-filter" id="tierFilter">
+                <button id="selectTierBtn">
+                    <p th:text="${tier}"></p>
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAe0lEQVR4nGNgIBaUlZVplpaWhuLDZWVlmgxFRUWypaWlX0pLS//jwN/Ky8sVwKaWlpbW4FJYUlJSDbe+vr6eraSk5AYWRbfr6+s50N3qisVEL6weKykpWYukaA3OEIB5rKSk5CvcA7hAaWlpVVlZWSXBcM3NzWUHYXQJAMMabOBg+HwjAAAAAElFTkSuQmCC" alt="give-way--v1">
+                </button>
+            </div>
+            <input type="text">
+        </div>
+        <table class="ranking" id="ranking">
+            <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>소환사 이름</th>
+                    <th>티어</th>
+                    <th>LP</th>
+                    <th>레벨</th>
+                    <th>승률</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="ranking, stat : ${rankingsPage.content}">
+                    <td th:text="${rankingsPage.number * rankingsPage.size + stat.index + 1}"></td>
+                    <td>
+                        <span th:text="${ranking.summoner.gameName + '#' + ranking.summoner.tagLine}"></span>
+                    </td>
+                    <td th:text="${ranking.tier == 10 ? 'Challenger' : (ranking.tier == 9 ? 'Grandmaster' : (ranking.tier == 8 ? 'Master' : (ranking.tier == 7 ? 'Diamond' : (ranking.tier == 6 ? 'Emerald' : (ranking.tier == 5 ? 'Platinum' : (ranking.tier == 4 ? 'Gold' : (ranking.tier == 3 ? 'Silver' : (ranking.tier == 2 ? 'Bronze' : 'Iron')))))))) + ' ' + (ranking.tier != 10 ? ranking.rank : '')}"></td>
+                    <td th:text="${ranking.leaguePoints}"></td>
+                    <td th:text="${ranking.summoner.summonerLevel}"></td>
+                    <td th:text="${ranking.wins + '승 ' + ranking.losses + '패 (' + ranking.rate + '%)'}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </main>
 
 <footer></footer>
-
 
 </body>
 </html>

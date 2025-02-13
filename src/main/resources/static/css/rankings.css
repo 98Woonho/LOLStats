@@ -1,0 +1,141 @@
+.header {
+    background-color: #31313C;
+    color: var(--font-primary1);
+}
+
+.header h1 {
+    font-size: 25px;
+    font-weight: 600;
+    width: 1080px;
+    margin: 0 auto;
+    padding: 15px 0;
+}
+
+.queue-type {
+    display: flex;
+    width: 1080px;
+    margin: 0 auto;
+    padding-bottom: 5px;
+    gap: 5px;
+}
+
+.queue-type a {
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+.queue-type a.selected {
+    background-color: #27292B;
+}
+
+.queue-type a:hover {
+    background-color: #5C5C66;
+}
+
+.content-container {
+    width: 1080px;
+    margin: 10px auto 0 auto;
+}
+
+.filter-container {
+    background-color: #3E3E45;
+    border-radius: 5px;
+    padding: 10px 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tier-filter {
+    width: 130px;
+    position: relative;
+}
+
+.tier-filter button {
+    width: inherit;
+    background-color: inherit;
+    border-radius: 5px;
+    border: 1px solid #757575;
+    padding: 10px 15px;
+    color: var(--font-primary);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tier-filter button:hover {
+    cursor: pointer;
+    background-color: #303036;
+}
+
+.tier-list {
+    width: inherit;
+    position: absolute;
+    background-color: #323238;
+    color: var(--font-primary1);
+    border-radius: 5px;
+}
+
+.tier-list li {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    height: 35px;
+    padding: 0 15px;
+    font-size: 12px;
+}
+
+.tier-list li:hover {
+    background-color: #27272B;
+    cursor: pointer;
+}
+
+.tier-list li:not(:last-child) {
+    border-bottom: 1px solid #1C1C1F;
+}
+
+.tier-list li img {
+    width: 20px;
+}
+
+.ranking {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.ranking thead {
+    color: var(--font-primary);
+    background-color: #323238;
+}
+
+.ranking thead th {
+    padding: 10px;
+}
+
+.ranking thead th:first-child {
+    border-radius: 4px 0 0 0;
+}
+
+.ranking thead th:last-child {
+    border-radius: 0 4px 0 0;
+}
+
+.ranking tbody {
+    color: var(--font-primary1);
+    background-color: #3E3E45;
+}
+
+.ranking tbody td {
+    padding: 10px;
+    border-top: 1px solid #202024;
+    text-align: center;
+}
+
+.ranking tbody span {
+    cursor: pointer;
+}

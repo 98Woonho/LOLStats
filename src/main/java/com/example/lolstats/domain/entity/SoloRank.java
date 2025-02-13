@@ -2,10 +2,7 @@ package com.example.lolstats.domain.entity;
 
 
 import com.example.lolstats.domain.dto.RankDto;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,12 +23,30 @@ public class SoloRank {
     private int leaguePoints;
     private int wins;
     private int losses;
+    private int rate;
+
+    @OneToOne(fetch = FetchType.LAZY)  // 지연 로딩 (필요시 즉시 로딩 EAGER로 설정)
+    @JoinColumn(name = "summoner_id")  // 외래키 컬럼명
+    private Summoner summoner;  // 소환사 정보
+
+    // 생성자에서 summoner를 null로 설정
+    public SoloRank(String summonerId, int tier, int rank, int leaguePoints, int wins, int losses, int rate) {
+        this.summonerId = summonerId;
+        this.tier = tier;
+        this.rank = rank;
+        this.leaguePoints = leaguePoints;
+        this.wins = wins;
+        this.losses = losses;
+        this.rate = rate;
+        this.summoner = null;  // 'summoner'는 null
+    }
 
     public SoloRank(RankDto dto) {
         this.summonerId = dto.getSummonerId();
         this.leaguePoints = dto.getLeaguePoints();
         this.wins = dto.getWins();
         this.losses = dto.getLosses();
+        this.rate = (int) ((double) dto.getWins() / (dto.getWins() + dto.getLosses()) * 100);
 
         switch (dto.getRank()) {
             case "I":
