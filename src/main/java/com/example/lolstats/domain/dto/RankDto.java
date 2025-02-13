@@ -20,6 +20,7 @@ public class RankDto {
     private int leaguePoints;
     private int wins;
     private int losses;
+    private int rate;
     private Boolean hotStreak;
     private Boolean veteran;
     private Boolean freshBlood;
@@ -30,6 +31,7 @@ public class RankDto {
         this.leaguePoints = flexRank.getLeaguePoints();
         this.wins = flexRank.getWins();
         this.losses = flexRank.getLosses();
+        this.rate = flexRank.getRate();
 
         switch (flexRank.getRank()) {
             case 1:
@@ -88,6 +90,7 @@ public class RankDto {
         this.leaguePoints = soloRank.getLeaguePoints();
         this.wins = soloRank.getWins();
         this.losses = soloRank.getLosses();
+        this.rate = soloRank.getRate();
 
         switch (soloRank.getRank()) {
             case 1:

@@ -121,7 +121,7 @@
 }
 
 .profile-info .renew-time {
-    color: #ADADAB;
+    color: var(--font-primary1);
 }
 
 .stats-container {

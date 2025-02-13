@@ -28,7 +28,7 @@
                 <a href="#">챔피언 정보</a>
             </li>
             <li>
-                <a href="#">랭킹</a>
+                <a href="/rankings">랭킹</a>
             </li>
             <li>
                 <a href="#">...</a>
@@ -49,7 +49,7 @@
         <button id="refreshBtn">Refresh</button>
     </div>
     <div class="search-container">
-        <form action="/summoners" method="GET">
+        <form id="searchInfoForm" action="/summoners">
             <input id="summonerName" name="summonerName" type="text" placeholder="플레이어 이름 (예 : player#KR1)"
                    autocomplete="off" required>
             <button type="submit">

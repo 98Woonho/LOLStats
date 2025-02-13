@@ -46,10 +46,10 @@ public class LolController {
                 .onErrorResume(CustomException.class, e -> Mono.just(ResponseEntity.status(e.getStatus()).body(e.getMessage())));
     }
 
-    @GetMapping("/summoner")
-    public SummonerDto getSummoner(@RequestParam("summonerName") String summonerName) {
-        return lolService.getSummoner(summonerName);
-    }
+//    @GetMapping("/summoner")
+//    public SummonerDto getSummoner(@RequestParam("summonerName") String summonerName) {
+//        return lolService.getSummoner(summonerName);
+//    }
 
     @GetMapping("/ranks")
     public RanksDto getRanks(@RequestParam("summonerId") String summonerId) {

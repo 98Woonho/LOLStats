@@ -1,9 +1,9 @@
-const version = '15.1.1';
-const championsJsonUrl = '/json/champions.json';
+const version = '15.3.1';
 const main = document.getElementById('main');
-const urlParams = new URLSearchParams(window.location.search); // 현재 URL에서 쿼리 파라미터를 가져오기
-const summonerName = urlParams.get('summonerName'); // summonerName 파라미터 값 가져오기
-const queueType = urlParams.get('queueType') || 'ALL'; // queueType 파라미터 값 가져오기
+const path = window.location.pathname; // 현재 path 가져오기
+const parts = path.split("/");
+const summonerName = decodeURIComponent(parts[2]); // summonerName 가져오기
+const queueType = parts[3] // queueType 가져오기
 const lastSummonerName = sessionStorage.getItem('lastSummonerName') || ''; // sessionStorage에서 lastSummonerName 값 가져오기
 let start = 0;
 let championStatsData = {}; // 챔피언 전적을 저장할 객체
@@ -31,7 +31,7 @@ if (lastSummonerName !== summonerName) {
         const encodedSummonerName = encodeURIComponent(summonerName);
 
         // 소환사 데이터 가져오기
-        const summoner = await axios.get(`/lol/summoner?summonerName=${encodedSummonerName}`);
+        const summoner = await axios.get(`/summoners/${encodedSummonerName}`);
 
         // 소환사 랭크 정보 가져오기
         const ranks = await axios.get(`/lol/ranks?summonerId=${summoner.data.id}`);
@@ -84,7 +84,7 @@ if (lastSummonerName !== summonerName) {
                 <div class="summoner-profile-container">
                     <div class="summoner-profile">
                         <div class="profile-icon">
-                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/profileicon/${profileIconId}.png" alt="">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${profileIconId}.png" alt="">
                             <div class="summoner-level">${summonerLevel}</div>
                         </div>
                         <div class="profile-info">
@@ -119,26 +119,28 @@ if (lastSummonerName !== summonerName) {
             main.appendChild(loadingContainer);
         }
 
-        const summonerDataKey = `summonerData_${summonerName}_${queueType === null ? 'ALL' : queueType}`; // 저장될 데이터의 키 (소환사 이름을 기반으로 저장)
+        // TODO : 로컬 스토리지 용량 문제로 이 방법은 불가능
+        // TODO : HTML을 DB에 저장해서 가져오는 방법으로 변경할 예정
+        const summonerDataKey = `summonerData_${summonerName}_${queueType}`; // 저장될 데이터의 키 (소환사 이름을 기반으로 저장)
         const summonerData = localStorage.getItem(summonerDataKey); // 로컬 저장소에서 소환사 데이터 가져오기
 
         const statsContainerHtml = summonerData || `
             <div class="stats-container">
                 <ul class="queue-type-container">
                     <li>
-                        <a class="${queueType === 'ALL' ? 'selected' : ''}" href="/summoners?summonerName=${encodedSummonerName}&queueType=ALL">전체</a>
+                        <a class="${queueType === 'ALL' ? 'selected' : ''}" href="/summoners/${encodedSummonerName}/ALL">전체</a>
                     </li>   
                     <li>
-                        <a class="${queueType === 'SOLORANK' ? 'selected' : ''}" href="/summoners?summonerName=${encodedSummonerName}&queueType=SOLORANK">개인/2인 랭크 게임</a>
+                        <a class="${queueType === 'SOLORANK' ? 'selected' : ''}" href="/summoners/${encodedSummonerName}/SOLORANK">개인/2인 랭크 게임</a>
                     </li>
                     <li>
-                        <a class="${queueType === 'FLEXRANK' ? 'selected' : ''}" href="/summoners?summonerName=${encodedSummonerName}&queueType=FLEXRANK">자유 랭크 게임</a>
+                        <a class="${queueType === 'FLEXRANK' ? 'selected' : ''}" href="/summoners/${encodedSummonerName}/FLEXRANK">자유 랭크 게임</a>
                     </li>
                     <li>
-                        <a class="${queueType === 'NORMAL' ? 'selected' : ''}" href="/summoners?summonerName=${encodedSummonerName}&queueType=NORMAL">일반</a>
+                        <a class="${queueType === 'NORMAL' ? 'selected' : ''}" href="/summoners/${encodedSummonerName}/NORMAL">일반</a>
                     </li>
                     <li>
-                        <a class="${queueType === 'ARAM' ? 'selected' : ''}" href="/summoners?summonerName=${encodedSummonerName}&queueType=ARAM">무작위 총력전</a>
+                        <a class="${queueType === 'ARAM' ? 'selected' : ''}" href="/summoners/${encodedSummonerName}/=ARAM">무작위 총력전</a>
                     </li>
                 </ul>
                 <div class="content-container" id="contentContainer">
@@ -703,13 +705,13 @@ async function renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType)
                                     <div class="build">
                                         <div class="champion">
                                             <p>${participant.champLevel}</p>
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/champion/${participant.championName}.png"
+                                            <img src="https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${participant.championName}.png"
                                                  alt="">
                                         </div>
                                         <div class="spells">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/spell/${spell1Img}"
+                                            <img src="https://ddragon.leagueoflegends.com/cdn/${version}/img/spell/${spell1Img}"
                                                  alt="">
-                                            <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/spell/${spell2Img}"
+                                            <img src="https://ddragon.leagueoflegends.com/cdn/${version}/img/spell/${spell2Img}"
                                                  alt="">
                                         </div>
                                         <div class="runes">
@@ -812,19 +814,13 @@ async function renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType)
 
 // spell image를 가져오는 함수
 async function getSpellImgs(spellId) {
-    const spellsJsonUrl = '/json/spells.json';
-
     try {
-        const response = await fetch(spellsJsonUrl);
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch JSON data');
-        }
+        const response = await fetch(`https://ddragon.leagueoflegends.com/cdn/${version}/data/ko_KR/summoner.json`);
 
         const spells = await response.json();
 
-        // 스펠 image return
-        return spells.find(spell => parseInt(spell.key) === spellId).image.full;
+        // 배열로 변환 후, find로 특정 스펠 img 찾은 후 return
+        return Object.values(spells.data).find(spell => parseInt(spell.key) === spellId).image.full;
     } catch (err) {
         console.log(err);
     }
@@ -833,12 +829,7 @@ async function getSpellImgs(spellId) {
 // 주 룬 url을 가져오는 함수
 async function getPrimaryRuneUrl(primaryRuneStyleId, primaryRuneId) {
     try {
-        const runesJsonUrl = '/json/runes.json';
-
-        const response = await fetch(runesJsonUrl);
-        if (!response.ok) {
-            throw new Error('Failed to fetch JSON data');
-        }
+        const response = await fetch(`https://ddragon.leagueoflegends.com/cdn/${version}/data/ko_KR/runesReforged.json`);
 
         const runes = await response.json();
 
@@ -853,9 +844,7 @@ async function getPrimaryRuneUrl(primaryRuneStyleId, primaryRuneId) {
 
 // 서브 룬 url을 가져오는 함수
 async function getSubRuneUrl(subRuneStyleId) {
-    const runesJsonUrl = '/json/runes.json';
-
-    const response = await fetch(runesJsonUrl);
+    const response = await fetch(`https://ddragon.leagueoflegends.com/cdn/${version}/data/ko_KR/runesReforged.json`);
     if (!response.ok) {
         throw new Error('Failed to fetch JSON data');
     }
@@ -920,33 +909,34 @@ async function processMatchData(match) {
     const championImg = match.querySelector('.champion img').src;
     const championName = championImg.split('/').pop().split('.')[0];
 
-    const response = await fetch(championsJsonUrl);
-    if (!response.ok) {
-        throw new Error('Failed to fetch JSON data');
+    try {
+        const response = await fetch(`https://ddragon.leagueoflegends.com/cdn/${version}/data/ko_KR/champion.json`);
+
+        const champions = await response.json();
+        const championInfo = champions.data[championName];
+        const championNameKR = championInfo.name;
+
+        if (!championStatsData[championName]) {
+            championStatsData[championName] = {
+                championNameKR: championNameKR,
+                games: 0,
+                wins: 0,
+                losses: 0,
+                kills: 0,
+                deaths: 0,
+                assists: 0
+            };
+        }
+
+        championStatsData[championName].games++;
+        championStatsData[championName].wins += match.classList.contains('win') ? 1 : 0;
+        championStatsData[championName].losses += !match.classList.contains('win') ? 1 : 0;
+        championStatsData[championName].kills += kills;
+        championStatsData[championName].deaths += deaths;
+        championStatsData[championName].assists += assists;
+    } catch (error) {
+        console.log(error);
     }
-
-    const champions = await response.json();
-    const championInfo = champions.data[championName];
-    const championNameKR = championInfo.name;
-
-    if (!championStatsData[championName]) {
-        championStatsData[championName] = {
-            championNameKR: championNameKR,
-            games: 0,
-            wins: 0,
-            losses: 0,
-            kills: 0,
-            deaths: 0,
-            assists: 0
-        };
-    }
-
-    championStatsData[championName].games++;
-    championStatsData[championName].wins += match.classList.contains('win') ? 1 : 0;
-    championStatsData[championName].losses += !match.classList.contains('win') ? 1 : 0;
-    championStatsData[championName].kills += kills;
-    championStatsData[championName].deaths += deaths;
-    championStatsData[championName].assists += assists;
 }
 
 async function renderChampionStats(championStats) {
@@ -961,7 +951,7 @@ async function renderChampionStats(championStats) {
 
         content.innerHTML = `
             <div class="champion-info">
-                <img src="https://ddragon.leagueoflegends.com/cdn/15.1.1/img/champion/${championName}.png" alt="">
+                <img src="https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${championName}.png" alt="">
                 <p>${championNameKR}</p>
             </div>
             <div class="kda-info">
@@ -969,7 +959,7 @@ async function renderChampionStats(championStats) {
                 <p>${((kills + assists) / deaths).toFixed(2)}:1</p>
             </div>
             <div class="win-lose-info">
-                <p>${wins}승 ${losses}패</p>
+                <p >${(wins * 100 / (wins + losses)).toFixed(0)}%</p>
                 <p>${games} 경기</p>
             </div>
         `;

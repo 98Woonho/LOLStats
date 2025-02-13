@@ -26,11 +26,9 @@ public class HomeController {
     @Value("${riot.api.key}")
     private String RIOT_API_KEY;
 
-    private WebClient webClient;
-
     @PostConstruct
     public void init() {
-        this.webClient = WebClient.builder()
+        WebClient webClient = WebClient.builder()
                 .defaultHeader("X-Riot-Token", RIOT_API_KEY)
                 .build();
     }
@@ -39,12 +37,6 @@ public class HomeController {
     @GetMapping("/")
     public String home() {
         return "index";
-    }
-
-    @GetMapping("/summoners")
-    public String getSummoners(@RequestParam(value = "summonerName") String summonerName, Model model) {
-        model.addAttribute("summonerName", summonerName);
-        return "summoners";
     }
 
     // 티어별 유저 정보를 가져오는 controller test
