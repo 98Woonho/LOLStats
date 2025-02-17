@@ -191,8 +191,8 @@ public class LolServiceImpl implements LolService {
                         .bodyToMono(new ParameterizedTypeReference<List<RankDto>>() {})
                         .block();
 
-                SoloRank soloRank;
-                FlexRank flexRank;
+                SoloRank soloRank = null;
+                FlexRank flexRank = null;
               
                 if (ranks.isEmpty()) {
                     soloRank = new SoloRank(summonerId, 0, 0, 0, 0, 0, 0);
@@ -203,8 +203,13 @@ public class LolServiceImpl implements LolService {
                     soloRank = rank.getQueueType().equals("RANKED_FLEX_SR") ? new SoloRank(summonerId, 0, 0, 0, 0, 0, 0) : new SoloRank(rank);
                     flexRank = rank.getQueueType().equals("RANKED_FLEX_SR") ? new FlexRank(rank) : new FlexRank(summonerId, 0, 0, 0, 0, 0, 0);
                 } else {
-                    soloRank = new SoloRank(ranks.get(0));
-                    flexRank = new FlexRank(ranks.get(1));
+                    for (RankDto rank : ranks) {
+                        if ("RANKED_SOLO_5x5".equals(rank.getQueueType())) {
+                            soloRank = new SoloRank(rank);
+                        } else {
+                            flexRank = new FlexRank(rank);
+                        }
+                    }
                 }
 
                 soloRankRepository.save(soloRank);

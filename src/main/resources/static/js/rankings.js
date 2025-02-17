@@ -65,7 +65,9 @@ const trs = ranking.querySelectorAll('tbody tr');
 trs.forEach(tr => {
     const span = tr.querySelector('span');
 
-    span.addEventListener('click', function() {
-        window.location.href = `/summoners/${encodeURIComponent(span.innerText)}/ALL`;
-    })
+    if (span) {
+        span.addEventListener('click', function() {
+            window.location.href = `/summoners/${encodeURIComponent(span.innerText)}/ALL`;
+        })
+    }
 })

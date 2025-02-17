@@ -119,12 +119,11 @@ if (lastSummonerName !== summonerName) {
             main.appendChild(loadingContainer);
         }
 
-        // TODO : 로컬 스토리지 용량 문제로 이 방법은 불가능
-        // TODO : HTML을 DB에 저장해서 가져오는 방법으로 변경할 예정
-        const summonerDataKey = `summonerData_${summonerName}_${queueType}`; // 저장될 데이터의 키 (소환사 이름을 기반으로 저장)
-        const summonerData = localStorage.getItem(summonerDataKey); // 로컬 저장소에서 소환사 데이터 가져오기
+        let summonerStatsData = await axios.get(`/summonerStats?summonerId=${summoner.data.id}&queueType=${queueType}`);
 
-        const statsContainerHtml = summonerData || `
+        summonerStatsData = summonerStatsData.data === "" ? null : decodeURIComponent(summonerStatsData.data);
+
+        const statsContainerHtml = summonerStatsData || `
             <div class="stats-container">
                 <ul class="queue-type-container">
                     <li>
@@ -208,24 +207,36 @@ if (lastSummonerName !== summonerName) {
                 championStatsData = {};
 
                 for (const match of contentRight.querySelectorAll('.match')) {
-                     await processMatchData(match)
+                    await processMatchData(match)
                 }
 
                 await renderChampionStats(championStats);
             });
         }
 
-        if (summonerData === null) {
+        // 저장된 소환사 전적 데이터가 없으면 render 및 db에 저장
+        if (summonerStatsData === null) {
             await renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType);
+
+            // 최근 플레이한 챔피언 데이터 처리
+            for (const match of contentRight.querySelectorAll('.match')) {
+                await processMatchData(match);
+            }
+
+            // 최근 플레이한 챔피언 render
+            await renderChampionStats(championStats);
+
+            await axios.post('/summonerStats', {
+                summonerId: summoner.data.id,
+                queueType: queueType,
+                htmlContent: encodeURIComponent(statsContainer.outerHTML)
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
         }
 
-        for (const match of contentRight.querySelectorAll('.match')) {
-            await processMatchData(match);
-        }
-
-        await renderChampionStats(championStats);
-
-        localStorage.setItem(summonerDataKey, statsContainer.outerHTML);
         sessionStorage.setItem('lastSummonerName', summonerName);
         main.removeChild(loadingContainer);
 
@@ -292,164 +303,165 @@ async function renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType)
             try {
                 const response = await axios.get('/lol/match?matchId=' + matchId);
 
-                const info = response.data.info;
+                if (response && response.data) {
+                    const info = response.data.info;
 
-                // 타임 스탬프
-                const currentTime = new Date();
-                let timeStamp = currentTime.getTime() - info.gameCreation;
+                    // 타임 스탬프
+                    const currentTime = new Date();
+                    let timeStamp = currentTime.getTime() - info.gameCreation;
 
-                const days = Math.floor(timeStamp / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((timeStamp % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((timeStamp % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeStamp % (1000 * 60)) / 1000);
+                    const days = Math.floor(timeStamp / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeStamp % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeStamp % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeStamp % (1000 * 60)) / 1000);
 
-                if (days !== 0) {
-                    timeStamp = `${days}일 전`;
-                } else if (hours !== 0) {
-                    timeStamp = `${hours}시간 전`;
-                } else if (minutes !== 0) {
-                    timeStamp = `${minutes}분 전`;
-                } else if (seconds !== 0) {
-                    timeStamp = `${seconds}초 전`;
-                } else {
-                    timeStamp = '방금 전';
-                }
+                    if (days !== 0) {
+                        timeStamp = `${days}일 전`;
+                    } else if (hours !== 0) {
+                        timeStamp = `${hours}시간 전`;
+                    } else if (minutes !== 0) {
+                        timeStamp = `${minutes}분 전`;
+                    } else if (seconds !== 0) {
+                        timeStamp = `${seconds}초 전`;
+                    } else {
+                        timeStamp = '방금 전';
+                    }
 
-                // 게임 지속 시간
-                const gameDuration = info.gameDuration;
-                const gameDurationHours = Math.floor(gameDuration / 3600);
-                const gameDurationMinutes = Math.floor((gameDuration % 3600) / 60);
-                const gameDurationSeconds = gameDuration % 60;
+                    // 게임 지속 시간
+                    const gameDuration = info.gameDuration;
+                    const gameDurationHours = Math.floor(gameDuration / 3600);
+                    const gameDurationMinutes = Math.floor((gameDuration % 3600) / 60);
+                    const gameDurationSeconds = gameDuration % 60;
 
-                /** QueueId
-                 * 490 : 일반 게임(소환사의 협곡)
-                 * 420 : 랭크 게임(솔로/듀오)
-                 * 440 : 랭크 게임(자유랭크)
-                 * 450 : 무작위 총력전(칼바람 나락)
-                 * 900 : URF
-                 * 1010 : 모두 무작위 URF
-                 * 830 : AI 상대 게임(초급 봇)
-                 * 840 : AI 상대 게임(중급 봇)
-                 * 850 : AI 상대 게임(숙련 봇)
-                 */
-                const queueId = info.queueId;
+                    /** QueueId
+                     * 490 : 일반 게임(소환사의 협곡)
+                     * 420 : 랭크 게임(솔로/듀오)
+                     * 440 : 랭크 게임(자유랭크)
+                     * 450 : 무작위 총력전(칼바람 나락)
+                     * 900 : URF
+                     * 1010 : 모두 무작위 URF
+                     * 830 : AI 상대 게임(초급 봇)
+                     * 840 : AI 상대 게임(중급 봇)
+                     * 850 : AI 상대 게임(숙련 봇)
+                     */
+                    const queueId = info.queueId;
 
-                // queueId에 따른 queueType
-                const queueTypes = {
-                    490: '일반',
-                    420: '개인/2인 랭크 게임',
-                    440: '자유 랭크 게임',
-                    450: '무작위 총력전',
-                    900: 'U.R.F',
-                    1010: 'U.R.F',
-                    830: '초급 봇',
-                    840: '중급 봇',
-                    850: '숙련 봇'
-                };
+                    // queueId에 따른 queueType
+                    const queueTypes = {
+                        490: '일반',
+                        420: '개인/2인 랭크 게임',
+                        440: '자유 랭크 게임',
+                        450: '무작위 총력전',
+                        900: 'U.R.F',
+                        1010: 'U.R.F',
+                        830: '초급 봇',
+                        840: '중급 봇',
+                        850: '숙련 봇'
+                    };
 
-                const queueType = queueTypes[queueId] || '알 수 없는 게임 모드';
+                    const queueType = queueTypes[queueId] || '알 수 없는 게임 모드';
 
-                // 게임 참가자 정보 배열
-                const participants = info.participants;
+                    // 게임 참가자 정보 배열
+                    const participants = info.participants;
 
-                // 참가자들 중, 챔피언에게 준 피해 max
-                let maxDamage = 0;
-                for (const participant of participants) {
-                    maxDamage = Math.max(maxDamage, participant.totalDamageDealtToChampions);
-                }
+                    // 참가자들 중, 챔피언에게 준 피해 max
+                    let maxDamage = 0;
+                    for (const participant of participants) {
+                        maxDamage = Math.max(maxDamage, participant.totalDamageDealtToChampions);
+                    }
 
-                // 참가자들 중, 받은 피해 max
-                let maxTakenDamage = 0;
-                for (const participant of participants) {
-                    maxTakenDamage = Math.max(maxTakenDamage, participant.totalDamageTaken);
-                }
+                    // 참가자들 중, 받은 피해 max
+                    let maxTakenDamage = 0;
+                    for (const participant of participants) {
+                        maxTakenDamage = Math.max(maxTakenDamage, participant.totalDamageTaken);
+                    }
 
-                // 내 정보
-                const myInfo = participants.find(participant => puuid === participant.puuid);
+                    // 내 정보
+                    const myInfo = participants.find(participant => puuid === participant.puuid);
 
-                // 내 팀 Id
-                const myTeamId = myInfo.teamId;
+                    // 내 팀 Id
+                    const myTeamId = myInfo.teamId;
 
-                // 내 팀
-                const myTeam = info.teams.find(team => team.teamId === myTeamId);
+                    // 내 팀
+                    const myTeam = info.teams.find(team => team.teamId === myTeamId);
 
-                // 내 팀 오브젝트 객체
-                const myTeamObjectives = myTeam.objectives;
+                    // 내 팀 오브젝트 객체
+                    const myTeamObjectives = myTeam.objectives;
 
-                // 적 팀
-                const enemyTeam = info.teams.find(team => team.teamId !== myTeamId);
+                    // 적 팀
+                    const enemyTeam = info.teams.find(team => team.teamId !== myTeamId);
 
-                // 적 팀 오브젝트 객체
-                const enemyTeamObjectives = enemyTeam.objectives;
+                    // 적 팀 오브젝트 객체
+                    const enemyTeamObjectives = enemyTeam.objectives;
 
-                // 내 승패 여부
-                const isWin = myTeam.win;
+                    // 내 승패 여부
+                    const isWin = myTeam.win;
 
-                // 내 팀 참가자들
-                const myTeamParticipants = participants.filter(participant => participant.teamId === myTeamId);
+                    // 내 팀 참가자들
+                    const myTeamParticipants = participants.filter(participant => participant.teamId === myTeamId);
 
-                // 내 팀의 총 킬
-                let myTeamTotalKills = 0;
-                for (const participant of myTeamParticipants) {
-                    myTeamTotalKills += participant.kills;
-                }
+                    // 내 팀의 총 킬
+                    let myTeamTotalKills = 0;
+                    for (const participant of myTeamParticipants) {
+                        myTeamTotalKills += participant.kills;
+                    }
 
-                // 내 팀의 총 골드
-                let myTeamTotalGold = 0;
-                for (const participant of myTeamParticipants) {
-                    myTeamTotalGold += participant.goldEarned;
-                }
+                    // 내 팀의 총 골드
+                    let myTeamTotalGold = 0;
+                    for (const participant of myTeamParticipants) {
+                        myTeamTotalGold += participant.goldEarned;
+                    }
 
-                // 적 팀 참가자들
-                const enemyTeamParticipants = participants.filter(participant => participant.teamId !== myTeamId);
+                    // 적 팀 참가자들
+                    const enemyTeamParticipants = participants.filter(participant => participant.teamId !== myTeamId);
 
-                // 적 팀의 총 킬
-                let enemyTeamTotalKills = 0;
-                for (const participant of enemyTeamParticipants) {
-                    enemyTeamTotalKills += participant.kills;
-                }
+                    // 적 팀의 총 킬
+                    let enemyTeamTotalKills = 0;
+                    for (const participant of enemyTeamParticipants) {
+                        enemyTeamTotalKills += participant.kills;
+                    }
 
-                // 내 팀의 총 골드
-                let enemyTeamTotalGold = 0;
-                for (const participant of enemyTeamParticipants) {
-                    enemyTeamTotalGold += participant.goldEarned;
-                }
+                    // 내 팀의 총 골드
+                    let enemyTeamTotalGold = 0;
+                    for (const participant of enemyTeamParticipants) {
+                        enemyTeamTotalGold += participant.goldEarned;
+                    }
 
-                // 내 아이템
-                const myItem0 = myInfo.item0;
-                const myItem1 = myInfo.item1;
-                const myItem2 = myInfo.item2;
-                const myItem3 = myInfo.item3;
-                const myItem4 = myInfo.item4;
-                const myItem5 = myInfo.item5;
-                const myItem6 = myInfo.item6;
+                    // 내 아이템
+                    const myItem0 = myInfo.item0;
+                    const myItem1 = myInfo.item1;
+                    const myItem2 = myInfo.item2;
+                    const myItem3 = myInfo.item3;
+                    const myItem4 = myInfo.item4;
+                    const myItem5 = myInfo.item5;
+                    const myItem6 = myInfo.item6;
 
-                // 내 스펠 이미지
-                const spell1Img = await getSpellImgs(myInfo.summoner1Id);
-                const spell2Img = await getSpellImgs(myInfo.summoner2Id);
+                    // 내 스펠 이미지
+                    const spell1Img = await getSpellImgs(myInfo.summoner1Id);
+                    const spell2Img = await getSpellImgs(myInfo.summoner2Id);
 
-                // 소환사 룬 정보
-                const perks = myInfo.perks;
-                const perksStyles = perks.styles;
-                const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
-                const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
-                const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
+                    // 소환사 룬 정보
+                    const perks = myInfo.perks;
+                    const perksStyles = perks.styles;
+                    const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
+                    const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
+                    const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
 
-                // 룬 이미지 Url
-                const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
-                const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
+                    // 룬 이미지 Url
+                    const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
+                    const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
 
-                // kda avg
-                let myKdaAvg = ((myInfo.kills + myInfo.assists) / myInfo.deaths).toFixed(2);
-                if (!isFinite(myKdaAvg)) {
-                    myKdaAvg = 'Perfect';
-                } else if (isNaN(myKdaAvg)) {
-                    myKdaAvg = 0;
-                }
+                    // kda avg
+                    let myKdaAvg = ((myInfo.kills + myInfo.assists) / myInfo.deaths).toFixed(2);
+                    if (!isFinite(myKdaAvg)) {
+                        myKdaAvg = 'Perfect';
+                    } else if (isNaN(myKdaAvg)) {
+                        myKdaAvg = 0;
+                    }
 
-                // HTML 생성
-                const match = new DOMParser().parseFromString(
-                    `
+                    // HTML 생성
+                    const match = new DOMParser().parseFromString(
+                        `
                             <div class="match ${gameDuration <= 180 ? "again" : isWin ? "win" : "lose"}">
                                 <div class="match-summary">
                                     <div class="infos">
@@ -666,40 +678,40 @@ async function renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType)
                             </div>
                         `, 'text/html');
 
-                const tables = match.querySelectorAll('.match-detail > table');
+                    const tables = match.querySelectorAll('.match-detail > table');
 
-                const tbodies = [
-                    {tbody: tables[0].querySelector('tbody'), participants: myTeamParticipants},
-                    {tbody: tables[1].querySelector('tbody'), participants: enemyTeamParticipants},
-                ];
+                    const tbodies = [
+                        {tbody: tables[0].querySelector('tbody'), participants: myTeamParticipants},
+                        {tbody: tables[1].querySelector('tbody'), participants: enemyTeamParticipants},
+                    ];
 
-                // 상세 정보 테이블의 tbody에 참가자 정보 넣기
-                for (const {tbody, participants} of tbodies) {
-                    for (const participant of participants) {
-                        if (participant.championName === 'FiddleSticks') participant.championName = 'Fiddlesticks';
+                    // 상세 정보 테이블의 tbody에 참가자 정보 넣기
+                    for (const {tbody, participants} of tbodies) {
+                        for (const participant of participants) {
+                            if (participant.championName === 'FiddleSticks') participant.championName = 'Fiddlesticks';
 
-                        const spell1Img = await getSpellImgs(participant.summoner1Id);
-                        const spell2Img = await getSpellImgs(participant.summoner2Id);
+                            const spell1Img = await getSpellImgs(participant.summoner1Id);
+                            const spell2Img = await getSpellImgs(participant.summoner2Id);
 
-                        const perks = participant.perks;
-                        const perksStyles = perks.styles;
-                        const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
-                        const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
-                        const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
+                            const perks = participant.perks;
+                            const perksStyles = perks.styles;
+                            const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
+                            const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
+                            const subPerkStyleId = perksStyles[1].style === 0 ? 8100 : perksStyles[1].style; // 서브 룬의 스타일 id
 
-                        const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
-                        const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
+                            const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
+                            const subRuneUrl = await getSubRuneUrl(subPerkStyleId);
 
-                        // kdaAvg
-                        let kdaAvg = ((participant.kills + participant.assists) / participant.deaths).toFixed(2);
+                            // kdaAvg
+                            let kdaAvg = ((participant.kills + participant.assists) / participant.deaths).toFixed(2);
 
-                        if (!isFinite(kdaAvg)) {
-                            kdaAvg = 'Perfect';
-                        } else if (isNaN(kdaAvg)) {
-                            kdaAvg = 0;
-                        }
+                            if (!isFinite(kdaAvg)) {
+                                kdaAvg = 'Perfect';
+                            } else if (isNaN(kdaAvg)) {
+                                kdaAvg = 0;
+                            }
 
-                        const html = `
+                            const html = `
                                 <tr class="${participant.championName === myInfo.championName ? "me" : ""}">
                                 <td>
                                     <div class="build">
@@ -778,18 +790,20 @@ async function renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType)
                             </tr>
                             `;
 
-                        // <tr>이 최상위 태그면 querySelector로 tr 태그를 가져오지 못해서 table로 감싼 뒤 가져옴.
-                        const wrappedHtml = `<table>${html}</table>`;
+                            // <tr>이 최상위 태그면 querySelector로 tr 태그를 가져오지 못해서 table로 감싼 뒤 가져옴.
+                            const wrappedHtml = `<table>${html}</table>`;
 
-                        const participantElement = new DOMParser().parseFromString(wrappedHtml, 'text/html');
+                            const participantElement = new DOMParser().parseFromString(wrappedHtml, 'text/html');
 
-                        const trElement = participantElement.querySelector('tr');
+                            const trElement = participantElement.querySelector('tr');
 
-                        tbody.appendChild(trElement);
+                            tbody.appendChild(trElement);
+                        }
                     }
-                }
 
-                matchesFragment.appendChild(match.querySelector('.match'));
+                    matchesFragment.appendChild(match.querySelector('.match'));
+
+                }
             } catch (err) {
                 console.log(err.response.data);
             }
@@ -907,7 +921,9 @@ async function processMatchData(match) {
     const kdaText = match.querySelector(".kda.value").innerText.trim();
     const [kills, deaths, assists] = kdaText.split(" / ").map(Number);
     const championImg = match.querySelector('.champion img').src;
-    const championName = championImg.split('/').pop().split('.')[0];
+    let championName = championImg.split('/').pop().split('.')[0];
+
+    if (championName === 'FiddleSticks') championName = 'Fiddlesticks';
 
     try {
         const response = await fetch(`https://ddragon.leagueoflegends.com/cdn/${version}/data/ko_KR/champion.json`);
@@ -947,7 +963,7 @@ async function renderChampionStats(championStats) {
     sortedChampionStatsData.forEach(([championName, stats]) => {
         const content = document.createElement('div');
         content.classList.add('content');
-        const { championNameKR, games, wins, losses, kills, deaths, assists } = stats;
+        const {championNameKR, games, wins, losses, kills, deaths, assists} = stats;
 
         content.innerHTML = `
             <div class="champion-info">

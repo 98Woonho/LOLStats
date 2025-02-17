@@ -106,6 +106,7 @@
 .ranking {
     width: 100%;
     margin-top: 20px;
+    margin-bottom: 30px;
 }
 
 .ranking thead {
@@ -138,4 +139,27 @@
 
 .ranking tbody span {
     cursor: pointer;
+}
+
+.pagination-container {
+    text-align: center; /* 부모 요소에서 중앙 정렬 */
+    color: var(--font-primary1);
+}
+
+.pagination-container a {
+    display: inline-block; /* 인라인 요소처럼 배치 */
+    width: 30px;
+    height: 30px;
+    line-height: 30px; /* 텍스트를 수직 중앙 정렬 */
+    border-radius: 5px;
+    background-color: #4E4E57;
+    margin: 0 3px;
+}
+
+.pagination-container a:hover {
+    background-color: #3E3E45;
+}
+
+.pagination-container a.selected {
+    background-color: #303036;
 }

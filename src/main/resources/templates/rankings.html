@@ -76,7 +76,7 @@
         <div class="filter-container">
             <div class="tier-filter" id="tierFilter">
                 <button id="selectTierBtn">
-                    <p th:text="${tier}"></p>
+                    <p th:text="${currentTier}"></p>
                     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAe0lEQVR4nGNgIBaUlZVplpaWhuLDZWVlmgxFRUWypaWlX0pLS//jwN/Ky8sVwKaWlpbW4FJYUlJSDbe+vr6eraSk5AYWRbfr6+s50N3qisVEL6weKykpWYukaA3OEIB5rKSk5CvcA7hAaWlpVVlZWSXBcM3NzWUHYXQJAMMabOBg+HwjAAAAAElFTkSuQmCC" alt="give-way--v1">
                 </button>
             </div>
@@ -94,8 +94,9 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="ranking, stat : ${rankingsPage.content}">
-                    <td th:text="${rankingsPage.number * rankingsPage.size + stat.index + 1}"></td>
+                <th:block th:if="${totalPage != 0}">
+                    <tr th:each="ranking, stat : ${rankingsPage.content}">
+                        <td th:text="${rankingsPage.number * rankingsPage.size + stat.index + 1}"></td>
                     <td>
                         <span th:text="${ranking.summoner.gameName + '#' + ranking.summoner.tagLine}"></span>
                     </td>
@@ -104,8 +105,23 @@
                     <td th:text="${ranking.summoner.summonerLevel}"></td>
                     <td th:text="${ranking.wins + '승 ' + ranking.losses + '패 (' + ranking.rate + '%)'}"></td>
                 </tr>
+                </th:block>
+                <th:block th:if="${totalPage == 0}">
+                    <tr><td colspan="6">소환사가 존재하지 않습니다.</td></tr>
+                </th:block>
             </tbody>
         </table>
+
+        <div th:if="${totalPage != 0}" class="pagination-container">
+            <a th:if="${currentPage > 1}" th:href="${'/rankings?page=' + (currentPage - 1) + (currentTier == 'All' ? '' : '&tier=' + currentTier)}">&lt;</a>
+
+            <a th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}"
+               th:href="${'/rankings?page=' + pageNumber + (currentTier == 'All' ? '' : '&tier=' + currentTier)}"
+               th:text="${pageNumber}"
+               th:class="${pageNumber == currentPage ? 'selected' : ''}"></a>
+
+            <a th:if="${currentPage != totalPage}" th:href="${'/rankings?page=' + (currentPage + 1) + (currentTier == 'All' ? '' : '&tier=' + currentTier)}">&gt;</a>
+        </div>
     </div>
 </main>
 
