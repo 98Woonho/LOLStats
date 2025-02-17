@@ -26,7 +26,7 @@ public class RankingsController {
                                   @RequestParam(value = "queueType", required = false, defaultValue = "SOLORANK") String queueType,
                                   @RequestParam(value = "page", defaultValue = "1") int page,
                                   Model model) {
-        Pageable pageable = PageRequest.of(page - 1, 2);
+        Pageable pageable = PageRequest.of(page - 1, 50);
 
         Page<?> rankingsPage;
 
