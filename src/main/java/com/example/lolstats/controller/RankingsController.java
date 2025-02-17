@@ -24,9 +24,9 @@ public class RankingsController {
     @GetMapping("")
     public String getRankingsView(@RequestParam(value = "tier", required = false, defaultValue = "All") String tier,
                                   @RequestParam(value = "queueType", required = false, defaultValue = "SOLORANK") String queueType,
-                                  @RequestParam(value = "page", defaultValue = "0") int page,
+                                  @RequestParam(value = "page", defaultValue = "1") int page,
                                   Model model) {
-        Pageable pageable = PageRequest.of(page, 50);
+        Pageable pageable = PageRequest.of(page - 1, 2);
 
         Page<?> rankingsPage;
 
@@ -36,8 +36,17 @@ public class RankingsController {
             rankingsPage = rankingService.getRankingsByTier(tier, queueType, pageable);
         }
 
+        int pageGroupSize = 10;
+        int totalPage = rankingsPage.getTotalPages();
+        int startPage = (((page - 1) / pageGroupSize) * pageGroupSize) + 1;
+        int endPage = Math.min(totalPage, startPage + pageGroupSize - 1);
+
         model.addAttribute("rankingsPage", rankingsPage);
-        model.addAttribute("tier", tier);
+        model.addAttribute("currentTier", tier);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPage", totalPage);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
 
         return "rankings";
     }
