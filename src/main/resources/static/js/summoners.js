@@ -139,7 +139,7 @@ if (lastSummonerName !== summonerName) {
                         <a class="${queueType === 'NORMAL' ? 'selected' : ''}" href="/summoners/${encodedSummonerName}/NORMAL">일반</a>
                     </li>
                     <li>
-                        <a class="${queueType === 'ARAM' ? 'selected' : ''}" href="/summoners/${encodedSummonerName}/=ARAM">무작위 총력전</a>
+                        <a class="${queueType === 'ARAM' ? 'selected' : ''}" href="/summoners/${encodedSummonerName}/ARAM">무작위 총력전</a>
                     </li>
                 </ul>
                 <div class="content-container" id="contentContainer">
@@ -235,6 +235,16 @@ if (lastSummonerName !== summonerName) {
                     'Content-Type': 'application/json'
                 }
             });
+        } else {
+            // 각 매치의 matchDetailBtn click event
+            for (const match of contentRight.querySelectorAll('.match')) {
+                const matchDetailBtn = match.querySelector('.match-detail-btn');
+                const matchDetail = match.querySelector('.match-detail');
+
+                matchDetailBtn.addEventListener('click', function () {
+                    matchDetail.classList.toggle('opened');
+                })
+            }
         }
 
         sessionStorage.setItem('lastSummonerName', summonerName);
@@ -266,8 +276,6 @@ if (lastSummonerName !== summonerName) {
         main.appendChild(error);
     }
 })();
-
-// async function addChampionStatsDOM()
 
 // 매치정보를 UI에 표시하는 함수
 async function renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType) {
@@ -445,7 +453,7 @@ async function renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType)
                     const perksStyles = perks.styles;
                     const primaryPerkStyleId = perksStyles[0].style; // 주 룬의 스타일 id
                     const primaryPerkId = perksStyles[0].selections[0].perk; // 주 룬 id
-                    const subPerkStyleId = perksStyles[1].style; // 서브 룬의 스타일 id
+                    const subPerkStyleId = perksStyles[1].style === 0 ? 8100 : perksStyles[1].style; // 서브 룬의 스타일 id
 
                     // 룬 이미지 Url
                     const primaryRuneUrl = await getPrimaryRuneUrl(primaryPerkStyleId, primaryPerkId);
@@ -677,6 +685,14 @@ async function renderMatches(puuid, contentRight, loadMoreMatchesBtn, queueType)
                                 </div>
                             </div>
                         `, 'text/html');
+
+                    const matchDetailBtn = match.querySelector('.match-detail-btn');
+                    const matchDetail = match.querySelector('.match-detail');
+
+                    // matchDetailBtn click event
+                    matchDetailBtn.addEventListener('click', function () {
+                        matchDetail.classList.toggle('opened');
+                    })
 
                     const tables = match.querySelectorAll('.match-detail > table');
 
@@ -911,13 +927,6 @@ async function saveRecentSearch(summonerName) {
 
 // match 데이터를 처리하는 함수
 async function processMatchData(match) {
-    const matchDetailBtn = match.querySelector('.match-detail-btn');
-    const matchDetail = match.querySelector('.match-detail');
-
-    matchDetailBtn.addEventListener('click', function () {
-        matchDetail.classList.toggle('opened');
-    })
-
     const kdaText = match.querySelector(".kda.value").innerText.trim();
     const [kills, deaths, assists] = kdaText.split(" / ").map(Number);
     const championImg = match.querySelector('.champion img').src;
